@@ -1,2 +1,2 @@
 # BienestarMayor
-Proyecto TFG del Grado Superior de Desarrollo de Aplicaciones Multiplataforma
+Proyecto TFC del Grado Superior de Desarrollo de Aplicaciones Multiplataforma
