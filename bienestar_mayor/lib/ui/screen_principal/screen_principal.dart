@@ -1,4 +1,6 @@
+import 'package:bienestar_mayor/router.dart';
 import 'package:bienestar_mayor/theme/custom_colors.dart';
+import 'package:bienestar_mayor/widgets/drawer_custom.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import '../../generated/assets.dart';
@@ -16,7 +18,7 @@ class _ScreenPrincipalState extends State<ScreenPrincipal> {
     return Scaffold(
       resizeToAvoidBottomInset: false,
       appBar: _appBar(),
-      drawer: _drawer(),
+      drawer: const DrawerCustom(),
       body: SingleChildScrollView(padding: const EdgeInsets.all(10.0),
           child: Container(
             alignment: Alignment.center,
@@ -24,10 +26,26 @@ class _ScreenPrincipalState extends State<ScreenPrincipal> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.start,
               children: [
-                _cardWithText("Gestionar medicamentos", CustomColors.azulFrancia, () { }, Assets.imagesEyeClosed),
-                _cardWithText("Ver calendario", CustomColors.verdeLima, () { }, Assets.imagesEyeClosed),
-                _cardWithText("Ver seguimiento", CustomColors.berenjena, () { }, Assets.imagesEyeClosed),
-                _cardWithText("Llamar a emergencias", CustomColors.rojo, () { }, Assets.imagesEyeClosed, width: 180),
+                _cardWithText("Gestionar medicamentos", CustomColors.azulFrancia, onTap: () {
+                  debugPrint("---------> Pulsado el boton de calendario.");
+                  Navigator.pushNamed(context, ROUTE_MEDICAMENTOS);
+                }, Assets.imagesEyeClosed),
+
+                _cardWithText("Ver calendario", CustomColors.verdeLima, onTap: () {
+                  debugPrint("---------> Pulsado el boton de calendario.");
+                  Navigator.pushNamed(context, ROUTE_CALENDAR);
+                  },
+                    Assets.imagesEyeClosed),
+
+                _cardWithText("Ver seguimiento", CustomColors.berenjena, onTap: () {
+                  debugPrint("---------> Pulsado el boton de calendario.");
+                  Navigator.pushNamed(context, ROUTE_SEGUIMIENTO);
+                }, Assets.imagesEyeClosed),
+
+                _cardWithText("Llamar a emergencias", CustomColors.rojo, onTap: () {
+                  debugPrint("---------> Pulsado el boton de calendario.");
+                  Navigator.pushNamed(context, ROUTE_EMERGENCY);
+                }, Assets.imagesEyeClosed, width: 180),
               ],
             ),
           ),
@@ -53,52 +71,52 @@ class _ScreenPrincipalState extends State<ScreenPrincipal> {
     );
   }
 
-  _drawer(){
-    return Drawer(
-      width: 250,
-      child: Container(
-        alignment: Alignment.center,
-        decoration: const BoxDecoration(color: Colors.white),
-        child: Column(
-          children: [
-            const SizedBox(height: 80,),
-            _drawerTile("Medicamentos", Icons.healing, subtitle: "Ver los medicamentos"),
-            const SizedBox(height: 20,),
-            _drawerTile("Calendario", Icons.date_range),
-            const SizedBox(height: 20,),
-            _drawerTile("Ver seguimiento", Icons.follow_the_signs),
-            const SizedBox(height: 100,),
-            _drawerTile("Llamar a emergencias", Icons.emergency, colorIcon: Colors.red),
+  // _drawer(){
+  //   return Drawer(
+  //     width: 250,
+  //     child: Container(
+  //       alignment: Alignment.center,
+  //       decoration: const BoxDecoration(color: Colors.white),
+  //       child: Column(
+  //         children: [
+  //           const SizedBox(height: 80,),
+  //           _drawerTile("Medicamentos", Icons.healing, subtitle: "Ver los medicamentos", onTapTile: (){}),
+  //           const SizedBox(height: 20,),
+  //           _drawerTile("Calendario", Icons.date_range, onTapTile: (){}),
+  //           const SizedBox(height: 20,),
+  //           _drawerTile("Ver seguimiento", Icons.follow_the_signs, onTapTile: (){}),
+  //           const SizedBox(height: 100,),
+  //           _drawerTile("Llamar a emergencias", Icons.emergency, colorIcon: Colors.red, onTapTile: (){}),
+  //
+  //           const Divider(height: 100,),
+  //           const Text("BienestarMayor", style: TextStyle(fontSize: 26, fontStyle: FontStyle.italic, fontWeight: FontWeight.w400),),
+  //           const SizedBox(height: 20,),
+  //           SvgPicture.asset(Assets.imagesEyeClosed, width: 50,),
+  //         ],
+  //       ),
+  //     ),
+  //   );
+  // }
+  //
+  // _drawerTile(String title, IconData icon, {String? subtitle, required void Function() onTapTile, Color? colorIcon}){
+  //   final Text? textWidget;
+  //   var color = colorIcon;
+  //
+  //   (subtitle != null) ? textWidget = Text(subtitle) : textWidget = null;
+  //
+  //   (colorIcon != null) ? color = colorIcon : color = Colors.black;
+  //
+  //   return ListTile(
+  //     leading: Icon(icon, size: 40,),
+  //     title: Text(title),
+  //     horizontalTitleGap: 20,
+  //     iconColor: color,
+  //     subtitle: textWidget,
+  //     onTap: onTapTile,
+  //   );
+  // }
 
-            const Divider(height: 100,),
-            const Text("BienestarMayor", style: TextStyle(fontSize: 26, fontStyle: FontStyle.italic, fontWeight: FontWeight.w400),),
-            const SizedBox(height: 20,),
-            SvgPicture.asset(Assets.imagesEyeClosed, width: 50,),
-          ],
-        ),
-      ),
-    );
-  }
-
-  _drawerTile(String title, IconData icon, {String? subtitle, Color? colorIcon}){
-    final Text? textWidget;
-    var color = colorIcon;
-
-    (subtitle != null) ? textWidget = Text(subtitle) : textWidget = null;
-
-    (colorIcon != null) ? color = colorIcon : color = Colors.black;
-
-    return ListTile(
-      leading: Icon(icon, size: 40,),
-      title: Text(title),
-      horizontalTitleGap: 20,
-      iconColor: color,
-      subtitle: textWidget,
-      onTap: _drawerOnTapTile,
-    );
-  }
-
-  _cardWithText(String text, Color color, void Function()? onTap, String assetImage, {int width = 320}){
+  _cardWithText(String text, Color color, String assetImage, { required void Function()? onTap, int width = 320}){
     return Column(
       children: [
         const SizedBox(height: 20,),
@@ -110,7 +128,7 @@ class _ScreenPrincipalState extends State<ScreenPrincipal> {
           decoration: BoxDecoration(borderRadius: BorderRadius.circular(20), color: color),
           alignment: Alignment.center,
           child: InkWell(
-            onTap: _cardOnTap,
+            onTap: onTap,
             child: Text(text, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),),
           ),
         ),
@@ -122,15 +140,6 @@ class _ScreenPrincipalState extends State<ScreenPrincipal> {
   ////////////////////////////////////////////
   // ACCIONES
   ////////////////////////////////////////////
-
-  ///Cuidado con querer cambiar a pantallas diferentes, hay que añadir argurmento de la ruta para ir a ella
-  _cardOnTap(){
-
-  }
-
-  _drawerOnTapTile(){
-
-  }
 
   // _showMenu(){
   //   debugPrint("Se ha pulsado el icono del menu");
