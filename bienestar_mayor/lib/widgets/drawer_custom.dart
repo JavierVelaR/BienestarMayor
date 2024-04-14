@@ -5,7 +5,8 @@ import 'package:flutter_svg/svg.dart';
 import '../generated/assets.dart';
 
 class DrawerCustom extends StatelessWidget {
-  const DrawerCustom({super.key});
+  final void Function() closeDrawer;
+  const DrawerCustom(this.closeDrawer, {super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -17,13 +18,32 @@ class DrawerCustom extends StatelessWidget {
         child: Column(
           children: [
             const SizedBox(height: 80,),
-            _drawerTile("Medicamentos", Icons.healing, subtitle: "Ver los medicamentos", onTapTile: () { Navigator.pushNamed(context, ROUTE_MEDICAMENTOS); }),
+            _drawerTile("Inicio", Icons.home, onTapTile: () {
+              closeDrawer();
+              /// TODO: Puedo comprobar si estoy en la pantalla principal?
+              /// para usar el drawer en otras pantallas ademas de principal
+              // Navigator.pushNamed(context, ROUTE_PRINCIPAL);
+            }),
             const SizedBox(height: 20,),
-            _drawerTile("Calendario", Icons.date_range, onTapTile: () { Navigator.pushNamed(context, ROUTE_CALENDAR); }),
+            _drawerTile("Medicamentos", Icons.healing, subtitle: "Ver los medicamentos", onTapTile: () {
+              closeDrawer();
+              Navigator.pushNamed(context, ROUTE_MEDICAMENTOS);
+            }),
             const SizedBox(height: 20,),
-            _drawerTile("Ver seguimiento", Icons.follow_the_signs, onTapTile: () { Navigator.pushNamed(context, ROUTE_SEGUIMIENTO); }),
+            _drawerTile("Calendario", Icons.date_range, onTapTile: () {
+              closeDrawer();
+              Navigator.pushNamed(context, ROUTE_CALENDAR);
+            }),
+            const SizedBox(height: 20,),
+            _drawerTile("Ver seguimiento", Icons.follow_the_signs, onTapTile: () {
+              closeDrawer();
+              Navigator.pushNamed(context, ROUTE_SEGUIMIENTO);
+            }),
             const SizedBox(height: 100,),
-            _drawerTile("Llamar a emergencias", Icons.emergency, colorIcon: Colors.red, onTapTile: () { Navigator.pushNamed(context, ROUTE_EMERGENCY); }),
+            _drawerTile("Llamar a emergencias", Icons.emergency, colorIcon: Colors.red, onTapTile: () {
+              closeDrawer();
+              Navigator.pushNamed(context, ROUTE_EMERGENCY);
+            }),
 
             const Divider(height: 100,),
             const Text("BienestarMayor", style: TextStyle(fontSize: 26, fontStyle: FontStyle.italic, fontWeight: FontWeight.w400),),

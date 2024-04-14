@@ -13,12 +13,15 @@ class ScreenPrincipal extends StatefulWidget {
 }
 
 class _ScreenPrincipalState extends State<ScreenPrincipal> {
+  var scaffoldKey = GlobalKey<ScaffoldState>();
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      key: scaffoldKey,
       resizeToAvoidBottomInset: false,
       appBar: _appBar(),
-      drawer: const DrawerCustom(),
+      drawer: DrawerCustom( () { scaffoldKey.currentState?.closeDrawer(); }),
       body: SingleChildScrollView(padding: const EdgeInsets.all(10.0),
           child: Container(
             alignment: Alignment.center,
@@ -29,13 +32,13 @@ class _ScreenPrincipalState extends State<ScreenPrincipal> {
                 _cardWithText("Gestionar medicamentos", CustomColors.azulFrancia, onTap: () {
                   debugPrint("---------> Pulsado el boton de calendario.");
                   Navigator.pushNamed(context, ROUTE_MEDICAMENTOS);
-                }, Assets.imagesEyeClosed),
+                }, Assets.imagesMedicamentos),
 
                 _cardWithText("Ver calendario", CustomColors.verdeLima, onTap: () {
                   debugPrint("---------> Pulsado el boton de calendario.");
                   Navigator.pushNamed(context, ROUTE_CALENDAR);
                   },
-                    Assets.imagesEyeClosed),
+                    Assets.imagesCalendario),
 
                 _cardWithText("Ver seguimiento", CustomColors.berenjena, onTap: () {
                   debugPrint("---------> Pulsado el boton de calendario.");
@@ -64,9 +67,11 @@ class _ScreenPrincipalState extends State<ScreenPrincipal> {
       backgroundColor: CustomColors.verdeBosque,
       toolbarHeight: 70,
       shadowColor: Colors.black,
-      // leading: IconButton(icon: const Icon(Icons.menu, color: Colors.white, size: 55,), onPressed: (){ _showMenu(); },),
+      leading: IconButton(
+        icon: const Icon(Icons.menu, color: Colors.white, size: 40,),
+        onPressed: (){ scaffoldKey.currentState?.openDrawer(); },),
       actions: [
-        IconButton(onPressed: () { _showAccount();}, icon: const Icon(Icons.person), iconSize: 40, color: Colors.white,),
+        IconButton(onPressed: () { _showConfigUser();}, icon: const Icon(Icons.person), iconSize: 40, color: Colors.white,),
       ],
     );
   }
@@ -123,13 +128,14 @@ class _ScreenPrincipalState extends State<ScreenPrincipal> {
         Text(text, style: const TextStyle(fontSize: 24, fontWeight: FontWeight.w600),),
         const SizedBox(height: 10,),
         Container(
-          width: width.toDouble(),
+          width: width/1.15,
           height: 120,
           decoration: BoxDecoration(borderRadius: BorderRadius.circular(20), color: color),
           alignment: Alignment.center,
           child: InkWell(
             onTap: onTap,
-            child: Text(text, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),),
+            child: SvgPicture.asset(assetImage),
+            // Text(text, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),),
           ),
         ),
       ],
@@ -145,8 +151,9 @@ class _ScreenPrincipalState extends State<ScreenPrincipal> {
   //   debugPrint("Se ha pulsado el icono del menu");
   // }
 
-  _showAccount(){
+  _showConfigUser(){
     debugPrint("Se ha pulsado el icono de la cuenta");
+    Navigator.pushNamed(context, ROUTE_CONFIG_USER);
   }
 
 }
