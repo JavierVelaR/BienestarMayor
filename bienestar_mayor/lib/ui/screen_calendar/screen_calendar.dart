@@ -11,21 +11,25 @@ class ScreenCalendar extends StatefulWidget {
 }
 
 class _ScreenCalendarState extends State<ScreenCalendar> {
-
+  var scaffoldKey = GlobalKey<ScaffoldState>();
   var _calendarFormat = CalendarFormat.month;
 
   @override
   Widget build(BuildContext context) {
-    var scaffoldKey = GlobalKey<ScaffoldState>();
-
     return Scaffold(
+      key: scaffoldKey,
       appBar: AppBar(
         title: const Text("Calendario", style: TextStyle(fontSize: 26)),
         centerTitle: true,
         backgroundColor: CustomColors.verdeBosque,
+        toolbarHeight: 70,
+        shadowColor: Colors.black,
+        leading: IconButton(
+          icon: const Icon(Icons.menu, color: Colors.white, size: 40,),
+          onPressed: (){ scaffoldKey.currentState?.openDrawer(); },),
       ),
 
-      drawer: DrawerCustom( () {scaffoldKey.currentState?.closeDrawer(); }),
+      drawer: DrawerCustom( closeDrawer: () {scaffoldKey.currentState?.closeDrawer(); },),
 
       /// TODO: boton para añadir evento/recordatorio
       floatingActionButton: FloatingActionButton(onPressed: (){}),

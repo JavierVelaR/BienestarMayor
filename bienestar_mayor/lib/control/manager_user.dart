@@ -20,15 +20,6 @@ class ManagerUser {
 
   ///////////////// CONTROL DE SESION ///////////////////////////
 
-  /// Respuesta de login
-  // late ResponseLogin _responseLogin;
-
-  /// Token de la sesion
-  // String get tokenSession => _responseLogin.token;
-
-  // DateTime get latestLogin => _responseLogin.latestLogin;
-
-
   /// Id de usuario
   int _userId = -1;
 
@@ -36,47 +27,33 @@ class ManagerUser {
   int get userId => _userId;
 
   /// Preferencias
+  static const PREFS_USERNAME = "username";
   static const PREFS_USER_EMAIL = "user_email";
-  static const PREFS_USER_PASS = "user_pass";
-  // static const PREFS_TOKEN_SESSION = "token_session";
 
   /// Guarda la sesion en preferencias
-  saveSessionToPrefs(String email, String pass /*, ResponseLogin responseLogin*/) async{
-    // _responseLogin = responseLogin;
+  saveSessionToPrefs(String username, String email) async{
     SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.setString(PREFS_USERNAME, username.trim());
     await prefs.setString(PREFS_USER_EMAIL, email.trim());
-    await prefs.setString(PREFS_USER_PASS, pass.trim());
-    // await prefs.setString(PREFS_TOKEN_SESSION, _responseLogin.token);
 
-
-    // Map<String, dynamic> decodedToken = JwtDecoder.decode(_responseLogin.token);
-    // _userId = decodedToken['idUser'];
   }
 
   /// Comprueba si hay sesión guardada en preferencias
   Future<bool> thereIsSessionSaved() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
 
-    return prefs.containsKey(PREFS_USER_EMAIL) && prefs.containsKey(PREFS_USER_PASS);
+    return prefs.containsKey(PREFS_USER_EMAIL) && prefs.containsKey(PREFS_USERNAME);
   }
 
   Future<Map<String, String>> getSessionFromPrefs() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     return{
+      PREFS_USERNAME: prefs.getString(PREFS_USERNAME)!,
       PREFS_USER_EMAIL: prefs.getString(PREFS_USER_EMAIL)!,
-      PREFS_USER_PASS: prefs.getString(PREFS_USER_PASS)!,
       // PREFS_TOKEN_SESSION: prefs.getString(PREFS_TOKEN_SESSION)!
 
     };
 
-  }
-
-
-  logout() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    await prefs.remove(PREFS_USER_EMAIL);
-    await prefs.remove(PREFS_USER_PASS);
-    // await prefs.remove(PREFS_TOKEN_SESSION);
   }
 
 }

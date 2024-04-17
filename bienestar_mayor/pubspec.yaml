@@ -41,6 +41,8 @@ dependencies:
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.6
   table_calendar: ^3.1.1
+  alarm: ^3.1.0
+  fluttertoast: ^8.2.5
 
 dev_dependencies:
   flutter_test:
@@ -52,6 +54,18 @@ dev_dependencies:
   # package. See that file for information about deactivating specific lint
   # rules and activating additional ones.
   flutter_lints: ^3.0.0
+  flutter_launcher_icons: ^0.11.0
+
+#########################################################################################################################################
+# Dependencias para cambiar el icono de la app, para hacer efectivo hay que añadir a res/drawable de Android, con Android Assets Studio #
+#########################################################################################################################################
+flutter_icons:
+  android: true
+  #  android: "launcher_icon"
+  ios: true
+  image_path: "./assets/images/placeholder_logo.svg"
+  #  adaptive_icon_background: "/lib/media/logo.png"
+
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec

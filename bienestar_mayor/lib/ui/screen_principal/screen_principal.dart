@@ -21,7 +21,7 @@ class _ScreenPrincipalState extends State<ScreenPrincipal> {
       key: scaffoldKey,
       resizeToAvoidBottomInset: false,
       appBar: _appBar(),
-      drawer: DrawerCustom( () { scaffoldKey.currentState?.closeDrawer(); }),
+      drawer: DrawerCustom( closeDrawer: () { scaffoldKey.currentState?.closeDrawer(); }, backButton: false,),
       body: SingleChildScrollView(padding: const EdgeInsets.all(10.0),
           child: Container(
             alignment: Alignment.center,
@@ -30,7 +30,7 @@ class _ScreenPrincipalState extends State<ScreenPrincipal> {
               mainAxisAlignment: MainAxisAlignment.start,
               children: [
                 _cardWithText("Gestionar medicamentos", CustomColors.azulFrancia, onTap: () {
-                  debugPrint("---------> Pulsado el boton de calendario.");
+                  debugPrint("---------> Pulsado el boton de medicamentos.");
                   Navigator.pushNamed(context, ROUTE_MEDICAMENTOS);
                 }, Assets.imagesMedicamentos),
 
@@ -41,14 +41,14 @@ class _ScreenPrincipalState extends State<ScreenPrincipal> {
                     Assets.imagesCalendario),
 
                 _cardWithText("Ver seguimiento", CustomColors.berenjena, onTap: () {
-                  debugPrint("---------> Pulsado el boton de calendario.");
+                  debugPrint("---------> Pulsado el boton de seguimiento.");
                   Navigator.pushNamed(context, ROUTE_SEGUIMIENTO);
-                }, Assets.imagesEyeClosed),
+                }, Assets.imagesSeguimiento),
 
                 _cardWithText("Llamar a emergencias", CustomColors.rojo, onTap: () {
-                  debugPrint("---------> Pulsado el boton de calendario.");
+                  debugPrint("---------> Pulsado el boton de emergencia.");
                   Navigator.pushNamed(context, ROUTE_EMERGENCY);
-                }, Assets.imagesEyeClosed, width: 180),
+                }, Assets.imagesEmergencia),
               ],
             ),
           ),
@@ -62,7 +62,7 @@ class _ScreenPrincipalState extends State<ScreenPrincipal> {
 
   _appBar(){
     return AppBar(
-      title: const Text("BienestarMayor", style: TextStyle(fontSize: 26, fontWeight: FontWeight.w500),),
+      title: const Text("BienestarMayor", style: TextStyle(fontSize: 28, fontWeight: FontWeight.w700),),
       centerTitle: true,
       backgroundColor: CustomColors.verdeBosque,
       toolbarHeight: 70,
@@ -76,61 +76,20 @@ class _ScreenPrincipalState extends State<ScreenPrincipal> {
     );
   }
 
-  // _drawer(){
-  //   return Drawer(
-  //     width: 250,
-  //     child: Container(
-  //       alignment: Alignment.center,
-  //       decoration: const BoxDecoration(color: Colors.white),
-  //       child: Column(
-  //         children: [
-  //           const SizedBox(height: 80,),
-  //           _drawerTile("Medicamentos", Icons.healing, subtitle: "Ver los medicamentos", onTapTile: (){}),
-  //           const SizedBox(height: 20,),
-  //           _drawerTile("Calendario", Icons.date_range, onTapTile: (){}),
-  //           const SizedBox(height: 20,),
-  //           _drawerTile("Ver seguimiento", Icons.follow_the_signs, onTapTile: (){}),
-  //           const SizedBox(height: 100,),
-  //           _drawerTile("Llamar a emergencias", Icons.emergency, colorIcon: Colors.red, onTapTile: (){}),
-  //
-  //           const Divider(height: 100,),
-  //           const Text("BienestarMayor", style: TextStyle(fontSize: 26, fontStyle: FontStyle.italic, fontWeight: FontWeight.w400),),
-  //           const SizedBox(height: 20,),
-  //           SvgPicture.asset(Assets.imagesEyeClosed, width: 50,),
-  //         ],
-  //       ),
-  //     ),
-  //   );
-  // }
-  //
-  // _drawerTile(String title, IconData icon, {String? subtitle, required void Function() onTapTile, Color? colorIcon}){
-  //   final Text? textWidget;
-  //   var color = colorIcon;
-  //
-  //   (subtitle != null) ? textWidget = Text(subtitle) : textWidget = null;
-  //
-  //   (colorIcon != null) ? color = colorIcon : color = Colors.black;
-  //
-  //   return ListTile(
-  //     leading: Icon(icon, size: 40,),
-  //     title: Text(title),
-  //     horizontalTitleGap: 20,
-  //     iconColor: color,
-  //     subtitle: textWidget,
-  //     onTap: onTapTile,
-  //   );
-  // }
-
   _cardWithText(String text, Color color, String assetImage, { required void Function()? onTap, int width = 320}){
     return Column(
       children: [
         const SizedBox(height: 20,),
-        Text(text, style: const TextStyle(fontSize: 24, fontWeight: FontWeight.w600),),
+        Text(text, style: const TextStyle(fontSize: 28, fontWeight: FontWeight.w600),),
         const SizedBox(height: 10,),
         Container(
-          width: width/1.15,
+          width: width/1.1,
           height: 120,
-          decoration: BoxDecoration(borderRadius: BorderRadius.circular(20), color: color),
+          decoration: BoxDecoration(
+              border: Border.all(),
+              borderRadius: BorderRadius.circular(20),
+              color: color,
+              boxShadow: const [BoxShadow(color: Colors.black12, offset: Offset(-1, 1))]),
           alignment: Alignment.center,
           child: InkWell(
             onTap: onTap,
@@ -141,15 +100,10 @@ class _ScreenPrincipalState extends State<ScreenPrincipal> {
       ],
     );
   }
-  
-  
+
   ////////////////////////////////////////////
   // ACCIONES
   ////////////////////////////////////////////
-
-  // _showMenu(){
-  //   debugPrint("Se ha pulsado el icono del menu");
-  // }
 
   _showConfigUser(){
     debugPrint("Se ha pulsado el icono de la cuenta");

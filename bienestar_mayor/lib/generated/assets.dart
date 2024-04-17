@@ -3,9 +3,11 @@ class Assets {
   Assets._();
 
   static const String imagesCalendario = 'assets/images/calendario.svg';
+  static const String imagesEmergencia = 'assets/images/emergencia.svg';
   static const String imagesEyeClosed = 'assets/images/eye_closed.svg';
   static const String imagesEyeOpened = 'assets/images/eye_opened.svg';
   static const String imagesMedicamentos = 'assets/images/medicamentos.svg';
   static const String imagesPlaceholderLogo = 'assets/images/placeholder_logo.svg';
+  static const String imagesSeguimiento = 'assets/images/seguimiento.svg';
 
 }

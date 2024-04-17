@@ -6,7 +6,8 @@ import '../generated/assets.dart';
 
 class DrawerCustom extends StatelessWidget {
   final void Function() closeDrawer;
-  const DrawerCustom(this.closeDrawer, {super.key});
+  final bool backButton;
+  const DrawerCustom({super.key, required this.closeDrawer, this.backButton = true});
 
   @override
   Widget build(BuildContext context) {
@@ -17,13 +18,16 @@ class DrawerCustom extends StatelessWidget {
         decoration: const BoxDecoration(color: Colors.white),
         child: Column(
           children: [
-            const SizedBox(height: 80,),
-            _drawerTile("Inicio", Icons.home, onTapTile: () {
-              closeDrawer();
-              /// TODO: Puedo comprobar si estoy en la pantalla principal?
-              /// para usar el drawer en otras pantallas ademas de principal
-              // Navigator.pushNamed(context, ROUTE_PRINCIPAL);
-            }),
+            const SizedBox(height: 30,),
+            (backButton)
+                ? _drawerTile("Inicio", Icons.home, onTapTile: () {
+                    closeDrawer();
+                    // Navigator.pushNamed(context, ROUTE_PRINCIPAL);
+                    Navigator.pop(context);
+                  })
+            // _drawerTile("Volver", Icons.arrow_back, onTapTile: (){ closeDrawer(); Navigator.pop(context); })
+                : const SizedBox(height: 50,),
+
             const SizedBox(height: 20,),
             _drawerTile("Medicamentos", Icons.healing, subtitle: "Ver los medicamentos", onTapTile: () {
               closeDrawer();
