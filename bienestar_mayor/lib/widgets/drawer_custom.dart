@@ -1,13 +1,15 @@
 import 'package:bienestar_mayor/router.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:url_launcher/url_launcher_string.dart';
 
 import '../generated/assets.dart';
 
 class DrawerCustom extends StatelessWidget {
   final void Function() closeDrawer;
-  final bool backButton;
-  const DrawerCustom({super.key, required this.closeDrawer, this.backButton = true});
+  // Si inicio es true, quiere decir que en el drawer habra un Tile para ir a inicio, si es false habra un hueco
+  final bool inicio;
+  const DrawerCustom({super.key, required this.closeDrawer, this.inicio = true});
 
   @override
   Widget build(BuildContext context) {
@@ -19,7 +21,7 @@ class DrawerCustom extends StatelessWidget {
         child: Column(
           children: [
             const SizedBox(height: 30,),
-            (backButton)
+            (inicio)
                 ? _drawerTile("Inicio", Icons.home, onTapTile: () {
                     closeDrawer();
                     // Navigator.pushNamed(context, ROUTE_PRINCIPAL);
@@ -31,22 +33,28 @@ class DrawerCustom extends StatelessWidget {
             const SizedBox(height: 20,),
             _drawerTile("Medicamentos", Icons.healing, subtitle: "Ver los medicamentos", onTapTile: () {
               closeDrawer();
-              Navigator.pushNamed(context, ROUTE_MEDICAMENTOS);
+              (inicio) ? Navigator.popAndPushNamed(context, ROUTE_MEDICAMENTOS)
+                  : Navigator.pushNamed(context, ROUTE_MEDICAMENTOS);
             }),
             const SizedBox(height: 20,),
             _drawerTile("Calendario", Icons.date_range, onTapTile: () {
               closeDrawer();
-              Navigator.pushNamed(context, ROUTE_CALENDAR);
+              (inicio) ? Navigator.popAndPushNamed(context, ROUTE_CALENDAR)
+                  : Navigator.pushNamed(context, ROUTE_CALENDAR);
             }),
             const SizedBox(height: 20,),
             _drawerTile("Ver seguimiento", Icons.follow_the_signs, onTapTile: () {
               closeDrawer();
-              Navigator.pushNamed(context, ROUTE_SEGUIMIENTO);
+
+              (inicio) ? Navigator.popAndPushNamed(context, ROUTE_SEGUIMIENTO)
+                  : Navigator.pushNamed(context, ROUTE_SEGUIMIENTO);
             }),
             const SizedBox(height: 100,),
             _drawerTile("Llamar a emergencias", Icons.emergency, colorIcon: Colors.red, onTapTile: () {
               closeDrawer();
-              Navigator.pushNamed(context, ROUTE_EMERGENCY);
+              // Navigator.pushNamed(context, ROUTE_EMERGENCY);
+              /// TODO: Cambiar a numero de emergencias
+              launchUrlString('tel://12341');
             }),
 
             const Divider(height: 100,),

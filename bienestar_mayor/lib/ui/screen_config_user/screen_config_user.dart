@@ -34,6 +34,7 @@ class _ScreenConfigUserState extends State<ScreenConfigUser> {
       body: Column(
         children: [
           _userData(),
+          ///TODO: numeros de familiares para llamar al pulsar emergencia
         ],
       ),
     );

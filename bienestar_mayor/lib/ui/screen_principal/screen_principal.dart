@@ -3,6 +3,7 @@ import 'package:bienestar_mayor/theme/custom_colors.dart';
 import 'package:bienestar_mayor/widgets/drawer_custom.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:url_launcher/url_launcher_string.dart';
 import '../../generated/assets.dart';
 
 class ScreenPrincipal extends StatefulWidget {
@@ -21,7 +22,7 @@ class _ScreenPrincipalState extends State<ScreenPrincipal> {
       key: scaffoldKey,
       resizeToAvoidBottomInset: false,
       appBar: _appBar(),
-      drawer: DrawerCustom( closeDrawer: () { scaffoldKey.currentState?.closeDrawer(); }, backButton: false,),
+      drawer: DrawerCustom( closeDrawer: () { scaffoldKey.currentState?.closeDrawer(); }, inicio: false,),
       body: SingleChildScrollView(padding: const EdgeInsets.all(10.0),
           child: Container(
             alignment: Alignment.center,
@@ -47,7 +48,9 @@ class _ScreenPrincipalState extends State<ScreenPrincipal> {
 
                 _cardWithText("Llamar a emergencias", CustomColors.rojo, onTap: () {
                   debugPrint("---------> Pulsado el boton de emergencia.");
-                  Navigator.pushNamed(context, ROUTE_EMERGENCY);
+                  /// TODO: Cambiar a numero de emergencias
+                  launchUrlString('tel://12341');
+                  // Navigator.pushNamed(context, ROUTE_EMERGENCY);
                 }, Assets.imagesEmergencia),
               ],
             ),
@@ -94,7 +97,6 @@ class _ScreenPrincipalState extends State<ScreenPrincipal> {
           child: InkWell(
             onTap: onTap,
             child: SvgPicture.asset(assetImage),
-            // Text(text, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),),
           ),
         ),
       ],

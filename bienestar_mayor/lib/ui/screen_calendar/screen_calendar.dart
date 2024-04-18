@@ -29,7 +29,7 @@ class _ScreenCalendarState extends State<ScreenCalendar> {
           onPressed: (){ scaffoldKey.currentState?.openDrawer(); },),
       ),
 
-      drawer: DrawerCustom( closeDrawer: () {scaffoldKey.currentState?.closeDrawer(); },),
+      drawer: DrawerCustom(inicio: true, closeDrawer: () {scaffoldKey.currentState?.closeDrawer(); },),
 
       /// TODO: boton para añadir evento/recordatorio
       floatingActionButton: FloatingActionButton(onPressed: (){}),
@@ -43,6 +43,8 @@ class _ScreenCalendarState extends State<ScreenCalendar> {
     );
   }
 
+  /// TODO: cuando haya recordatorios, que los dias en los que hay recordatorios tengan alguna marca de ello,
+  /// a ser posible con color especifico de la categoria (cita médica, tratamiento, ocio, personal)
   _calendar(){
     return TableCalendar(
       focusedDay: DateTime.now(),
