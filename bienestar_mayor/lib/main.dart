@@ -2,9 +2,11 @@ import 'package:alarm/alarm.dart';
 import 'package:bienestar_mayor/ui/screen_splash.dart';
 import 'package:flutter/material.dart';
 import 'package:bienestar_mayor/router.dart' as router;
+import 'package:intl/date_symbol_data_local.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
+  initializeDateFormatting("es_ES");
   Alarm.init();
 
   runApp(const MyApp());

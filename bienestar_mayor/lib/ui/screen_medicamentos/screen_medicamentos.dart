@@ -1,6 +1,8 @@
 import 'package:bienestar_mayor/router.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
+import '../../model/medicamento.dart';
 import '../../theme/custom_colors.dart';
 import '../../widgets/drawer_custom.dart';
 
@@ -14,28 +16,20 @@ class ScreenMedicamentos extends StatefulWidget {
 class _ScreenMedicamentosState extends State<ScreenMedicamentos> {
   var scaffoldKey = GlobalKey<ScaffoldState>();
 
+  List<Medicamento> _listaMedicamentos = List.empty();
+
+  @override
+  void initState() {
+    super.initState();
+    // TODO: Inicializar _listaMedicamentos con query a la db
+
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       key: scaffoldKey,
-      appBar: AppBar(
-        title: const Text("Medicamentos", style: TextStyle(fontSize: 26)),
-        centerTitle: true,
-        backgroundColor: CustomColors.azulFrancia,
-        toolbarHeight: 70,
-        shadowColor: Colors.black,
-        leading: IconButton(
-          icon: const Icon(
-            Icons.menu,
-            color: Colors.white,
-            size: 40,
-          ),
-          onPressed: () {
-            scaffoldKey.currentState?.openDrawer();
-          },
-        ),
-      ),
-
+      appBar: _appBar(),
       drawer: DrawerCustom(
         inicio: true,
         closeDrawer: () {
@@ -43,7 +37,6 @@ class _ScreenMedicamentosState extends State<ScreenMedicamentos> {
         },
       ),
 
-      /// TODO: boton para añadir medicamento
       floatingActionButton: SizedBox(
         height: 80,
         width: 80,
@@ -58,23 +51,43 @@ class _ScreenMedicamentosState extends State<ScreenMedicamentos> {
         ),
       ),
 
-      body: Container(
-          padding: const EdgeInsets.all(8),
+      body: Padding(
+          padding: const EdgeInsets.all(25),
           child: Column(
             children: [
-              Center(
-                child: const Text(
-                  "Medicamentos:",
-                  style: TextStyle(
-                    fontSize: 24,
-                  ),
-                ),
-              ),
-              _listMedTiles(),
+              _listaMedicamentos.isEmpty
+                  ? Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        SizedBox(height: MediaQuery.of(context).size.height/3.5,),
+                        const Text("Añade medicamentos para que se muestren aquí",
+                          style: TextStyle(fontSize: 28, fontStyle: FontStyle.italic, color: Colors.grey),),
+                      ]
+                    )
+                  : _listMedTiles(),
             ],
           )),
     );
   }
+
+  _appBar() => AppBar(
+    title: const Text("Medicamentos", style: TextStyle(fontSize: 26)),
+    centerTitle: true,
+    backgroundColor: CustomColors.azulFrancia,
+    toolbarHeight: 70,
+    shadowColor: Colors.black,
+    leading: IconButton(
+      icon: const Icon(
+        Icons.menu,
+        color: Colors.white,
+        size: 40,
+      ),
+      onPressed: () {
+        scaffoldKey.currentState?.openDrawer();
+      },
+    ),
+  );
+
 
   /// TODO: que aparezcan en orden alfabético, supongo que haciendo un query a la db usando ORDER BY
   /// usando un query 'medicamentos'
@@ -82,19 +95,20 @@ class _ScreenMedicamentosState extends State<ScreenMedicamentos> {
     return ListView.separated(
       shrinkWrap: true,
       separatorBuilder: (_, __) => const SizedBox(height: 15,),
-      itemCount: 3,
+      itemCount: _listaMedicamentos.length,
       itemBuilder: (_, index){
-        return _medTile("nombre");
+        final medicamento = _listaMedicamentos[index];
+        return _medTile(medicamento);
       },
     );
   }
 
-  _medTile(String nombre){
+  _medTile(Medicamento med){
     return ListTile(
       /// TODO: Si es miligramos, icono de pastilla, si es mililitros icono de bote con cuchara
-      leading: const Icon(Icons.image),
+      leading: Icon(med.dosis.contains("mg") ? Icons.medication : Icons.medication_liquid, color: Colors.blue[400],),
       horizontalTitleGap: 50,
-      title: Text(nombre),
+      title: Text(med.nombre),
       titleTextStyle: const TextStyle(fontSize: 22, color: Colors.black),
       subtitle: const Text("Subtitle"),
       subtitleTextStyle: const TextStyle(fontSize: 16, color: Colors.black),
@@ -103,7 +117,7 @@ class _ScreenMedicamentosState extends State<ScreenMedicamentos> {
         side: BorderSide(color: Colors.black54), //the outline color
         borderRadius: BorderRadius.all( Radius.circular(12))),
 
-      onTap: () { Navigator.pushNamed(context, ROUTE_MEDICAMENTO_DETAILS); },
+      onTap: () { Navigator.pushNamed(context, ROUTE_MEDICAMENTO_DETAILS, arguments: med); },
     );
   }
 

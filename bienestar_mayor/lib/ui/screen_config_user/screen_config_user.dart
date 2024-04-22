@@ -21,6 +21,8 @@ class _ScreenConfigUserState extends State<ScreenConfigUser> {
   final _emailController = TextEditingController();
   String _textError = "";
 
+  List<bool> selectedOption = <bool>[true,false];
+
   @override
   void initState() {
     super.initState();
@@ -34,6 +36,9 @@ class _ScreenConfigUserState extends State<ScreenConfigUser> {
       body: Column(
         children: [
           _userData(),
+          const SizedBox(height: 30,),
+          const Text("Repetir alarmas si no se apaga:", style: TextStyle(fontSize: 20),),
+          _repetirAlarmas(),
           ///TODO: numeros de familiares para llamar al pulsar emergencia
         ],
       ),
@@ -112,6 +117,29 @@ class _ScreenConfigUserState extends State<ScreenConfigUser> {
           ),
         ],
       );
+
+  _repetirAlarmas(){
+    return ToggleButtons(
+          isSelected: selectedOption,
+          borderRadius: const BorderRadius.all(Radius.circular(8)),
+          selectedBorderColor: Colors.blue[700],
+          selectedColor: Colors.white,
+          fillColor: Colors.blue[300],
+          textStyle: const TextStyle(fontSize: 16),
+          onPressed: (int index) {
+            /// TODO: alternar variable booleana en SharedPreferences desde ManagerUser
+            setState(() {
+              for (int i = 0; i < selectedOption.length; i++) {
+                selectedOption[i] = i == index;
+              }
+            });
+          },
+          children: const [
+            Text("No"),
+            Text("Sí"),
+          ],
+    );
+  }
 
 ///////////////////////////// ACCIONES /////////////////////////////////
   _onEditClick(BuildContext context) {

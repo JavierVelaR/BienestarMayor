@@ -44,6 +44,7 @@ dependencies:
   alarm: ^3.1.0
   fluttertoast: ^8.2.5
   url_launcher: ^6.2.6
+  image_picker: ^1.1.0
 
 dev_dependencies:
   flutter_test:

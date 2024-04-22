@@ -1,5 +1,6 @@
 import 'package:bienestar_mayor/model/medicamento.dart';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 
 import '../../theme/custom_colors.dart';
 
@@ -15,12 +16,10 @@ class _ScreenAddMedicamentoState extends State<ScreenAddMedicamento> {
   final _dosisController = TextEditingController();
   String _tipoDosis = "";
   int _horasEntreToma = -1;
+  TimeOfDay? _horaInicio;
   DateTimeRange _selectedDayRange = DateTimeRange(start: DateTime.now(), end: DateTime.now().add(const Duration(days: 7)));
+  XFile? _pickedFile;
 
-  /// TODO: formulario para añarir medicacion
-  /// Que haya un dropdown para seleccionar mg (miligramos) , ml (mililitros), etc...
-  /// Que haya también opción de no hay dosis, para tratamientos por ejemplo de quimio, radiografía...
-  /// Que haya un dropdown para seleccionar día, semana, mes, etc...
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -32,7 +31,6 @@ class _ScreenAddMedicamentoState extends State<ScreenAddMedicamento> {
             mainAxisAlignment: MainAxisAlignment.start,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              const SizedBox(height: 10,),
               const Text("Nombre del medicamento:", style: TextStyle(fontSize: 22, fontWeight: FontWeight.w500),),
               _editName(),
               const Text("Cantidad de dosis:", style: TextStyle(fontSize: 22, fontWeight: FontWeight.w500),),
@@ -41,9 +39,10 @@ class _ScreenAddMedicamentoState extends State<ScreenAddMedicamento> {
               const SizedBox(height: 20,),
               const Text("Cada cuantas horas:", style: TextStyle(fontSize: 22, fontWeight: FontWeight.w500),),
               _radioButtonsFrequency(),
+              _seleccionarHora(),
               const SizedBox(height: 20,),
               const Text("Duración del tratamiento:", style: TextStyle(fontSize: 22, fontWeight: FontWeight.w500),),
-              const SizedBox(height: 15,),
+              const SizedBox(height: 10,),
               Text("Inicio: ${_toDate(_selectedDayRange.start.day, _selectedDayRange.start.month)}     "
                   "Fin: ${_toDate(_selectedDayRange.end.day, _selectedDayRange.end.month)}",
                 style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600, color: CustomColors.zafiro),
@@ -52,7 +51,7 @@ class _ScreenAddMedicamentoState extends State<ScreenAddMedicamento> {
               _editDuration(),
               const SizedBox(height: 20,),
               _addPhoto(),
-              const SizedBox(height: 30,),
+              const SizedBox(height: 20,),
               _buttons(),
             ],
           ),
@@ -89,10 +88,10 @@ class _ScreenAddMedicamentoState extends State<ScreenAddMedicamento> {
   );
 
   _editDosis() => Row(
-    mainAxisAlignment: MainAxisAlignment.start,
+    mainAxisAlignment: MainAxisAlignment.spaceAround,
     children: [
       SizedBox(
-        width: MediaQuery.of(context).size.width/2.2,
+        width: MediaQuery.of(context).size.width/3,
         child: TextField(
           controller: _dosisController,
           decoration: const InputDecoration(
@@ -105,11 +104,11 @@ class _ScreenAddMedicamentoState extends State<ScreenAddMedicamento> {
           textAlign: TextAlign.center,
         ),
       ),
-      const SizedBox(width: 20,),
       DropdownMenu(
         dropdownMenuEntries: const [
           DropdownMenuEntry(value: 'mg', label: 'miligramos'),
           DropdownMenuEntry(value: 'ml', label: 'mililitros'),
+          DropdownMenuEntry(value: 'Sin dosis especificada', label: 'Sin especificar'),
         ],
         onSelected: (value){ value!=null ? _tipoDosis = value : _tipoDosis = ""; },
       )
@@ -124,42 +123,84 @@ class _ScreenAddMedicamentoState extends State<ScreenAddMedicamento> {
             value: 4,
             groupValue: _horasEntreToma,
             onChanged: (value){
+              _selectHora(value!);
               setState(() {
-                _horasEntreToma = value!;
+                _horasEntreToma = value;
               });
             }),
         const Text("4 h"),
-        const SizedBox(width: 20,),
         Radio(
             value: 6,
             groupValue: _horasEntreToma,
             onChanged: (value){
+              _selectHora(value!);
               setState(() {
-                _horasEntreToma = value!;
+                _horasEntreToma = value;
               });
             }),
         const Text("6 h"),
-        const SizedBox(width: 20,),
         Radio(
             value: 8,
             groupValue: _horasEntreToma,
             onChanged: (value){
+              _selectHora(value!);
               setState(() {
-                _horasEntreToma = value!;
+                _horasEntreToma = value;
               });
             }),
         const Text("8 h"),
-        const SizedBox(width: 20,),
         Radio(
             value: 12,
             groupValue: _horasEntreToma,
             onChanged: (value){
+              _selectHora(value!);
               setState(() {
-                _horasEntreToma = value!;
+                _horasEntreToma = value;
               });
             }),
         const Text("12 h"),
+        Radio(
+            value: 24,
+            groupValue: _horasEntreToma,
+            onChanged: (value){
+              _selectHora(value!);
+              setState(() {
+                _horasEntreToma = value;
+              });
+            }),
+        const Text("24 h"),
+      ],
+    );
+  }
 
+  _selectHora(int hora) async{
+    final horaSeleccionada = await showTimePicker(
+      context: context,
+      initialTime: const TimeOfDay(hour: 0, minute: 0),
+      helpText: "Seleccionar hora de inicio, para establecer alarmas cada $hora horas.",
+      barrierDismissible: false,
+      confirmText: "Confirmar",
+      cancelText: "Cancelar",
+    );
+    setState(() {
+      _horaInicio = horaSeleccionada;
+    });
+  }
+
+  _seleccionarHora(){
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        const Text("Hora de inicio:", style: TextStyle(fontSize: 20),),
+        const SizedBox(width: 10,),
+        _horaInicio!=null
+            ? Text("${_horaInicio!.hour}:${_horaInicio!.minute} ", style: const TextStyle(fontSize: 20),)
+            : ElevatedButton(
+            onPressed: (){
+              _selectHora(_horasEntreToma);
+            },
+            child: const Text("Seleccionar", style: TextStyle(fontSize: 15),)
+        ),
       ],
     );
   }
@@ -211,6 +252,62 @@ class _ScreenAddMedicamentoState extends State<ScreenAddMedicamento> {
     );
   }
 
+  _addPhoto(){
+    bool fotoCogida = false;
+
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+      children: [
+        const Text("Añadir foto:", style: TextStyle(fontSize: 22, fontWeight: FontWeight.w500),),
+        ElevatedButton(
+            onPressed: () async{
+              // código para añadir foto
+
+              showDialog(
+                  context: context,
+                  builder: (context) => AlertDialog(
+                    title: fotoCogida ? const Text("Ya has seleccionado una foto, ¿quieres cambiarla?")
+                    : const Text("¿Quieres tomar una foto o cargarla de la galería?"),
+                    alignment: Alignment.center,
+                    shadowColor: Colors.black,
+                    elevation: 10,
+                    actionsAlignment: MainAxisAlignment.end,
+                    actions: [
+                      /// TODO: arreglar toma y carga de imagenes
+                      TextButton(
+                          onPressed: () async{
+                            _pickedFile = await ImagePicker().pickImage(source: ImageSource.camera);
+                            if(_pickedFile != null && _pickedFile!.path.isNotEmpty){
+                              setState(() {
+                                fotoCogida = true;
+                              });
+                              Navigator.pop(context);
+                            }
+                          },
+                          child: const Text("Tomar foto")),
+                      TextButton(
+                          onPressed: () async{
+                            _pickedFile = await ImagePicker().pickImage(source: ImageSource.gallery);
+                            if(_pickedFile != null && _pickedFile!.path.isNotEmpty){
+                              setState(() {
+                                fotoCogida = true;
+                              });
+                              Navigator.pop(context);
+                            }
+                          },
+                          child: const Text("Cargar foto")),
+                      TextButton(onPressed: (){ Navigator.pop(context); }, child: const Text("No")),
+                    ],
+                  ),
+              );
+
+            },
+            child: fotoCogida ? const Icon(Icons.verified, size: 30, color: CustomColors.verdeLima,)
+                : const Text("Añadir foto", style: TextStyle(fontSize: 16))),
+      ],
+    );
+  }
+
   _buttons(){
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
@@ -257,27 +354,6 @@ class _ScreenAddMedicamentoState extends State<ScreenAddMedicamento> {
     );
   }
 
-  _addPhoto(){
-    bool fotoCogida = false;
-
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        const SizedBox(
-            width: 220,
-            height: 30,
-            child: Text("Puedes añadir foto:", style: TextStyle(fontSize: 22, fontWeight: FontWeight.w500),)
-        ),
-        ElevatedButton(
-            onPressed: (){
-              //TODO: código para añadir foto
-              // fotoCogida = true;
-            },
-            child: fotoCogida ? const Icon(Icons.verified, size: 30, color: CustomColors.verdeLima,)
-                : const Text("Añadir foto", style: TextStyle(fontSize: 16))),
-      ],
-    );
-  }
 
   ///////////////// CONVERSOR DE NUMEROS A PALABRA ////////////////////
   String _toDate(int day, int monthNumber) {
@@ -310,15 +386,16 @@ class _ScreenAddMedicamentoState extends State<ScreenAddMedicamento> {
     String tipoDosis = _tipoDosis;
     String dosisText = "$dosis $tipoDosis";
     int horasEntreToma = _horasEntreToma;
+    TimeOfDay? horaInicio = _horaInicio;
     int duracion = _selectedDayRange.duration.inDays;
 
-
-    if(nombre.isEmpty || dosis.isEmpty || tipoDosis.isEmpty || horasEntreToma == -1){
+    if(nombre.isEmpty || dosis.isEmpty || tipoDosis.isEmpty || horasEntreToma == -1 || horaInicio == null){
       return false;
     }
-    debugPrint("Nombre: $nombre, dosis: $dosisText, horas entre cada toma: $horasEntreToma, duración: $duracion días}");
+    debugPrint("Nombre: $nombre, dosis: $dosisText, horas entre cada toma: $horasEntreToma, hora de inicio de las tomas: $horaInicio, "
+        "duración: $duracion días}");
 
-    final newMedicamento = Medicamento(nombre: nombre, dosis: dosisText, duracion: duracion);
+    final newMedicamento = Medicamento(nombre: nombre, dosis: dosisText, frecuencia: horasEntreToma, duracion: duracion);
 
     /// Insertar medicamento en db
 

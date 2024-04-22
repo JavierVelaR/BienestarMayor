@@ -1,7 +1,10 @@
+import 'package:alarm/utils/extensions.dart';
 import 'package:bienestar_mayor/theme/custom_colors.dart';
 import 'package:bienestar_mayor/widgets/drawer_custom.dart';
 import 'package:flutter/material.dart';
 import 'package:table_calendar/table_calendar.dart';
+
+import '../../model/recordatorio.dart';
 
 class ScreenCalendar extends StatefulWidget {
   const ScreenCalendar({super.key});
@@ -13,6 +16,27 @@ class ScreenCalendar extends StatefulWidget {
 class _ScreenCalendarState extends State<ScreenCalendar> {
   var scaffoldKey = GlobalKey<ScaffoldState>();
   var _calendarFormat = CalendarFormat.month;
+
+  final Map<DateTime, List<Recordatorio>> _selectedEvents = {
+    DateTime(2024,04,30): [Recordatorio(nombre: "nombre", descripcion: "Descripcion", fecha_hora: "Fecha_hora")],
+  };
+
+  DateTime _selectedDay = DateTime.now();
+  DateTime _focusedDay = DateTime.now();
+
+  /// TODO: Nueva tabla evento en vez de recordatorio ¿?¿?
+  List<Recordatorio> _listaRecordatorios = List.empty();
+
+  @override
+  void initState() {
+    super.initState();
+    _cargarRecordatorios();
+  }
+
+  /// TODO: No se ven los marcadores de evento
+  List<Recordatorio> _getEvents(date){
+    return _selectedEvents[date] ?? [];
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -31,13 +55,31 @@ class _ScreenCalendarState extends State<ScreenCalendar> {
 
       drawer: DrawerCustom(inicio: true, closeDrawer: () {scaffoldKey.currentState?.closeDrawer(); },),
 
-      /// TODO: boton para añadir evento/recordatorio
-      floatingActionButton: FloatingActionButton(onPressed: (){}),
+      floatingActionButton: FloatingActionButton(
+        child: const Icon(Icons.add, size: 34,),
+        onPressed: (){
+          /// TODO: añadir evento/recordatorio y programar notificación
+
+        },
+      ),
 
       body: Column(
         children: [
           _calendar(),
-          const Text("Eventos:", style: TextStyle(fontSize: 20),)
+          _listaRecordatorios.isEmpty
+              ?  const Padding(
+                padding: EdgeInsets.all(30.0),
+                child: Column(
+                  children: [SizedBox(height: 50,),
+                  Text("Añade eventos a este día para verlos aquí",
+                    style: TextStyle(fontSize: 24, fontStyle: FontStyle.italic, color: Colors.grey),)]),
+              )
+          : Column(
+            children: [
+              const Text("Eventos:", style: TextStyle(fontSize: 20),),
+              _listEventTiles(),
+            ],
+          )
         ],
       ),
     );
@@ -47,9 +89,13 @@ class _ScreenCalendarState extends State<ScreenCalendar> {
   /// a ser posible con color especifico de la categoria (cita médica, tratamiento, ocio, personal)
   _calendar(){
     return TableCalendar(
-      focusedDay: DateTime.now(),
+      locale: "es_ES",
+      focusedDay: _focusedDay,
+      currentDay: DateTime.now(),
       firstDay: DateTime.utc(2024),
       lastDay: DateTime.utc(2028),
+      startingDayOfWeek: StartingDayOfWeek.monday,
+      eventLoader: _getEvents,
 
       headerStyle: const HeaderStyle(
         formatButtonTextStyle: TextStyle(fontSize: 18,),
@@ -100,6 +146,10 @@ class _ScreenCalendarState extends State<ScreenCalendar> {
           bottom: BorderSide(width: 3, color: Colors.grey),
         ),
 
+        // Marcadores de eventos (como max 3, al clickar, abajo se verán todos)
+        markerSize: 10,
+        markersMaxCount: 3,
+
       ),
 
       onFormatChanged: (CalendarFormat format) {
@@ -108,14 +158,30 @@ class _ScreenCalendarState extends State<ScreenCalendar> {
         });
       },
 
+      onDaySelected: (DateTime day, DateTime focusedDay) {
+        setState(() {
+          _selectedDay = day;
+          _focusedDay = focusedDay;
+        });
+      },
+
+      selectedDayPredicate: (day) { return isSameDay(_selectedDay, day); },
     );
   }
 
+
+  //////////////////////////////// EVENTOS ///////////////////////////////
   _listEventTiles(){
 
   }
 
+  ///TODO: al clickar un tile, que salgan los detalles en AlertDialog
   _eventTile(){
+
+  }
+
+  //////////////////////////////// CARGAR DE DB //////////////////////////////
+  _cargarRecordatorios(){
 
   }
 

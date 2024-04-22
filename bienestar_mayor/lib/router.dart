@@ -1,9 +1,11 @@
+import 'package:bienestar_mayor/model/medicamento.dart';
 import 'package:bienestar_mayor/ui/screen_calendar/screen_calendar.dart';
 import 'package:bienestar_mayor/ui/screen_config_user/screen_config_user.dart';
 import 'package:bienestar_mayor/ui/screen_medicamentos/screen_add_medicamento.dart';
 import 'package:bienestar_mayor/ui/screen_medicamentos/screen_medicamento_details.dart';
 import 'package:bienestar_mayor/ui/screen_medicamentos/screen_medicamentos.dart';
 import 'package:bienestar_mayor/ui/screen_principal/screen_principal.dart';
+import 'package:bienestar_mayor/ui/screen_seguimiento/screen_seguimiento.dart';
 import 'package:flutter/material.dart';
 
 const ROUTE_BASE = '/';
@@ -32,15 +34,17 @@ class Router{
         return MaterialPageRoute(
             builder: (_) => const ScreenAddMedicamento(), settings: settings);
       case ROUTE_MEDICAMENTO_DETAILS:
+        final arguments = settings.arguments as List<dynamic>;
+        final Medicamento med = arguments[0] as Medicamento;
+
         return MaterialPageRoute(
-            builder: (_) => const ScreenMedicamentoDetails(), settings: settings);
+            builder: (_) => ScreenMedicamentoDetails(med), settings: settings);
       case ROUTE_CALENDAR:
         return MaterialPageRoute(
             builder: (_) => const ScreenCalendar(), settings: settings);
       case ROUTE_SEGUIMIENTO:
         return MaterialPageRoute(
-          ///Cambiar a ScreenSeguimiento
-            builder: (_) => const ScreenCalendar(), settings: settings);
+            builder: (_) => const ScreenSeguimiento(), settings: settings);
       case ROUTE_EMERGENCY:
         return MaterialPageRoute(
           ///Cambiar a ScreenEmergency
