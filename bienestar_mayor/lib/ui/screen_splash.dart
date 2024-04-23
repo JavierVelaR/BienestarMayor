@@ -29,7 +29,13 @@ class _ScreenSplashState extends State<ScreenSplash> {
 
     return Scaffold(
       body: Center(
-        child: SvgPicture.asset(Assets.imagesPlaceholderLogo, width: mediaWidth, height: mediaHeith, fit: BoxFit.cover)
+        child: Column(
+          children: [
+            const SizedBox(height: 80,),
+            SvgPicture.asset(Assets.imagesBienestarMayorLogo, width: mediaWidth, height: mediaHeith, fit: BoxFit.cover),
+            const Text("BienestarMayor", style: TextStyle(fontSize: 46, fontFamily: 'georgia'),)
+          ],
+        )
       ),
     );
   }

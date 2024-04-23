@@ -1,9 +1,16 @@
 class Medicamento{
   final int id;
   final String nombre;
+
+  // "500ml", "1000mg"
   final String dosis;
+
+  // Cada cuantas horas
   final int frecuencia;
+
+  // Duración del tratamiento en días
   final int duracion;
+
   final String? foto;
 
   Medicamento({this.id = -1, required this.nombre,

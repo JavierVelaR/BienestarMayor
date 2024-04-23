@@ -45,6 +45,9 @@ dependencies:
   fluttertoast: ^8.2.5
   url_launcher: ^6.2.6
   image_picker: ^1.1.0
+  sqflite: ^2.3.3
+  path: ^1.9.0
+  flutter_launcher_icons: ^0.13.1
 
 dev_dependencies:
   flutter_test:
@@ -56,16 +59,16 @@ dev_dependencies:
   # package. See that file for information about deactivating specific lint
   # rules and activating additional ones.
   flutter_lints: ^3.0.0
-  flutter_launcher_icons: ^0.11.0
 
 #########################################################################################################################################
 # Dependencias para cambiar el icono de la app, para hacer efectivo hay que añadir a res/drawable de Android, con Android Assets Studio #
 #########################################################################################################################################
 flutter_icons:
-  android: true
-  #  android: "launcher_icon"
+  # android: true
+#  android: "launcher_icon"
+  android: "ic_launcher"
   ios: true
-  image_path: "./assets/images/placeholder_logo.svg"
+  image_path: "./assets/images/bienestar_mayor_logo2.png"
   #  adaptive_icon_background: "/lib/media/logo.png"
 
 

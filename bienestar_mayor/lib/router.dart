@@ -34,8 +34,7 @@ class Router{
         return MaterialPageRoute(
             builder: (_) => const ScreenAddMedicamento(), settings: settings);
       case ROUTE_MEDICAMENTO_DETAILS:
-        final arguments = settings.arguments as List<dynamic>;
-        final Medicamento med = arguments[0] as Medicamento;
+        final med = settings.arguments as Medicamento;
 
         return MaterialPageRoute(
             builder: (_) => ScreenMedicamentoDetails(med), settings: settings);

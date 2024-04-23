@@ -57,10 +57,9 @@ class DrawerCustom extends StatelessWidget {
               launchUrlString('tel://12341');
             }),
 
-            const Divider(height: 100,),
-            const Text("BienestarMayor", style: TextStyle(fontSize: 26, fontStyle: FontStyle.italic, fontWeight: FontWeight.w400),),
-            const SizedBox(height: 20,),
-            SvgPicture.asset(Assets.imagesEyeClosed, width: 50,),
+            const Divider(height: 50,),
+            SvgPicture.asset(Assets.imagesBienestarMayorLogo, width: 200,),
+            const Text("BienestarMayor", style: TextStyle(fontSize: 26, fontFamily: 'georgia'),),
           ],
         ),
       ),

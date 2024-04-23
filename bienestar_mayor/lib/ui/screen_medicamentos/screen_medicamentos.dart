@@ -1,5 +1,5 @@
+import 'package:bienestar_mayor/database/dao/medicamento_dao.dart';
 import 'package:bienestar_mayor/router.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 import '../../model/medicamento.dart';
@@ -21,8 +21,7 @@ class _ScreenMedicamentosState extends State<ScreenMedicamentos> {
   @override
   void initState() {
     super.initState();
-    // TODO: Inicializar _listaMedicamentos con query a la db
-
+    _cargarMedicamentos();
   }
 
   @override
@@ -30,27 +29,8 @@ class _ScreenMedicamentosState extends State<ScreenMedicamentos> {
     return Scaffold(
       key: scaffoldKey,
       appBar: _appBar(),
-      drawer: DrawerCustom(
-        inicio: true,
-        closeDrawer: () {
-          scaffoldKey.currentState?.closeDrawer();
-        },
-      ),
-
-      floatingActionButton: SizedBox(
-        height: 80,
-        width: 80,
-        child: FittedBox(
-          child: FloatingActionButton(
-            foregroundColor: CustomColors.verdeBosque,
-            backgroundColor: CustomColors.azulClaro,
-
-            child: const Icon(Icons.medication, size: 40,),
-            onPressed: () { Navigator.pushNamed(context, ROUTE_ADD_MEDICAMENTO); }
-          ),
-        ),
-      ),
-
+      drawer: _drawer(),
+      floatingActionButton: _floatingActionButton(),
       body: Padding(
           padding: const EdgeInsets.all(25),
           child: Column(
@@ -88,6 +68,29 @@ class _ScreenMedicamentosState extends State<ScreenMedicamentos> {
     ),
   );
 
+  _drawer() => DrawerCustom(
+    inicio: true,
+    closeDrawer: () {
+      scaffoldKey.currentState?.closeDrawer();
+    },
+  );
+
+  _floatingActionButton() => SizedBox(
+    height: 80,
+    width: 80,
+    child: FittedBox(
+      child: FloatingActionButton(
+          foregroundColor: CustomColors.verdeBosque,
+          backgroundColor: CustomColors.azulClaro,
+
+          child: const Icon(Icons.medication, size: 40,),
+          onPressed: () { Navigator.pushNamed(context, ROUTE_ADD_MEDICAMENTO); }
+      ),
+    ),
+  );
+
+
+  ////////////////////////////// LISTAR MEDICAMENTOS ////////////////////////////////
 
   /// TODO: que aparezcan en orden alfabético, supongo que haciendo un query a la db usando ORDER BY
   /// usando un query 'medicamentos'
@@ -119,6 +122,14 @@ class _ScreenMedicamentosState extends State<ScreenMedicamentos> {
 
       onTap: () { Navigator.pushNamed(context, ROUTE_MEDICAMENTO_DETAILS, arguments: med); },
     );
+  }
+
+  //////////////////////////////// BASE DE DATOS ////////////////////////////////////
+  _cargarMedicamentos() async{
+      List<Medicamento> meds = await MedicamentoDao().readAllMedicamentos();
+      setState(() {
+        _listaMedicamentos = meds;
+      });
   }
 
 }

@@ -1,3 +1,4 @@
+import 'package:bienestar_mayor/database/dao/medicamento_dao.dart';
 import 'package:bienestar_mayor/model/medicamento.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
@@ -380,7 +381,7 @@ class _ScreenAddMedicamentoState extends State<ScreenAddMedicamento> {
   /////////////////// GUARDAR EN BASE DE DATOS ////////////////////////
   ///TODO: insertar medicamento a db
   ///devuelve true si se ha insertado correctamente
-  bool _guardarMedicamento(){
+  bool _guardarMedicamento() {
     String nombre = _nameController.text;
     String dosis = _dosisController.text;
     String tipoDosis = _tipoDosis;
@@ -398,12 +399,17 @@ class _ScreenAddMedicamentoState extends State<ScreenAddMedicamento> {
     final newMedicamento = Medicamento(nombre: nombre, dosis: dosisText, frecuencia: horasEntreToma, duracion: duracion);
 
     /// Insertar medicamento en db
-
+    _insertarEnDb(newMedicamento);
 
     ///TODO: Una vez insertado el medicamento en la db, añadir los recordatorios a la db, y programar las alarmas
 
 
     return true;
+  }
+
+  _insertarEnDb(Medicamento med) async{
+    final newId = await MedicamentoDao().insertMedicamento(med);
+    med.copyWith(id: newId);
   }
 
 }

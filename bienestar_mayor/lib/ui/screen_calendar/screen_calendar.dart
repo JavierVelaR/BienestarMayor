@@ -4,7 +4,7 @@ import 'package:bienestar_mayor/widgets/drawer_custom.dart';
 import 'package:flutter/material.dart';
 import 'package:table_calendar/table_calendar.dart';
 
-import '../../model/recordatorio.dart';
+import '../../model/evento.dart';
 
 class ScreenCalendar extends StatefulWidget {
   const ScreenCalendar({super.key});
@@ -17,15 +17,15 @@ class _ScreenCalendarState extends State<ScreenCalendar> {
   var scaffoldKey = GlobalKey<ScaffoldState>();
   var _calendarFormat = CalendarFormat.month;
 
-  final Map<DateTime, List<Recordatorio>> _selectedEvents = {
-    DateTime(2024,04,30): [Recordatorio(nombre: "nombre", descripcion: "Descripcion", fecha_hora: "Fecha_hora")],
+  final Map<DateTime, List<Evento>> _selectedEvents = {
+    DateTime(2024,04,30): [Evento(titulo: "nombre", descripcion: "Descripcion")],
   };
 
   DateTime _selectedDay = DateTime.now();
   DateTime _focusedDay = DateTime.now();
 
   /// TODO: Nueva tabla evento en vez de recordatorio ¿?¿?
-  List<Recordatorio> _listaRecordatorios = List.empty();
+  List<Evento> _listaRecordatorios = List.empty();
 
   @override
   void initState() {
@@ -34,7 +34,7 @@ class _ScreenCalendarState extends State<ScreenCalendar> {
   }
 
   /// TODO: No se ven los marcadores de evento
-  List<Recordatorio> _getEvents(date){
+  List<Evento> _getEvents(date){
     return _selectedEvents[date] ?? [];
   }
 

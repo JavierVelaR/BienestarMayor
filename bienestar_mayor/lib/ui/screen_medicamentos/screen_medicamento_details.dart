@@ -1,3 +1,4 @@
+import 'package:bienestar_mayor/database/dao/medicamento_dao.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
@@ -119,6 +120,10 @@ class _ScreenMedicamentoDetailsState extends State<ScreenMedicamentoDetails> {
                             TextButton(
                                 onPressed: () {
                                   ///TODO: Eliminar medicamento y recordatorios de la db
+                                  MedicamentoDao().deleteMedicamento(widget._medicamento);
+
+                                  /// TODO: mostrar texto que se ha eliminado con exito
+
 
                                   // Salir de Dialog y salir a pantalla de listado de medicamentos
                                   Navigator.pop(context);

@@ -2,6 +2,8 @@
 class Assets {
   Assets._();
 
+  static const String imagesBienestarMayorLogo = 'assets/images/bienestar_mayor_logo.svg';
+  static const String imagesBienestarMayorLogo2 = 'assets/images/bienestar_mayor_logo2.png';
   static const String imagesCalendario = 'assets/images/calendario.svg';
   static const String imagesEmergencia = 'assets/images/emergencia.svg';
   static const String imagesEyeClosed = 'assets/images/eye_closed.svg';

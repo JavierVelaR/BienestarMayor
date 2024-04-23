@@ -31,23 +31,19 @@ class _ScreenPrincipalState extends State<ScreenPrincipal> {
               mainAxisAlignment: MainAxisAlignment.start,
               children: [
                 _cardWithText("Gestionar medicamentos", CustomColors.azulFrancia, onTap: () {
-                  debugPrint("---------> Pulsado el boton de medicamentos.");
                   Navigator.pushNamed(context, ROUTE_MEDICAMENTOS);
                 }, Assets.imagesMedicamentos),
 
                 _cardWithText("Ver calendario", CustomColors.verdeLima, onTap: () {
-                  debugPrint("---------> Pulsado el boton de calendario.");
                   Navigator.pushNamed(context, ROUTE_CALENDAR);
                   },
                     Assets.imagesCalendario),
 
                 _cardWithText("Ver seguimiento", CustomColors.berenjena, onTap: () {
-                  debugPrint("---------> Pulsado el boton de seguimiento.");
                   Navigator.pushNamed(context, ROUTE_SEGUIMIENTO);
                 }, Assets.imagesSeguimiento),
 
                 _cardWithText("Llamar a emergencias", CustomColors.rojo, onTap: () {
-                  debugPrint("---------> Pulsado el boton de emergencia.");
                   /// TODO: Cambiar a numero de emergencias
                   launchUrlString('tel://12341');
                   // Navigator.pushNamed(context, ROUTE_EMERGENCY);
@@ -108,7 +104,6 @@ class _ScreenPrincipalState extends State<ScreenPrincipal> {
   ////////////////////////////////////////////
 
   _showConfigUser(){
-    debugPrint("Se ha pulsado el icono de la cuenta");
     Navigator.pushNamed(context, ROUTE_CONFIG_USER);
   }
 

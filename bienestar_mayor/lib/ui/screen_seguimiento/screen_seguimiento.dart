@@ -1,7 +1,7 @@
 import 'package:bienestar_mayor/widgets/drawer_custom.dart';
 import 'package:flutter/material.dart';
 
-import '../../model/recordatorio.dart';
+import '../../model/evento.dart';
 import '../../theme/custom_colors.dart';
 
 class ScreenSeguimiento extends StatefulWidget {
@@ -13,7 +13,7 @@ class ScreenSeguimiento extends StatefulWidget {
 
 class _ScreenSeguimientoState extends State<ScreenSeguimiento> {
   var scaffoldKey = GlobalKey<ScaffoldState>();
-  List<Recordatorio> _listaRecordatorios = List.empty();
+  List<Evento> _listaRecordatorios = List.empty();
 
   @override
   void initState() {

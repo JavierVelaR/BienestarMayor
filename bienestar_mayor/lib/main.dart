@@ -1,4 +1,5 @@
 import 'package:alarm/alarm.dart';
+import 'package:bienestar_mayor/database/db_helper.dart';
 import 'package:bienestar_mayor/ui/screen_splash.dart';
 import 'package:flutter/material.dart';
 import 'package:bienestar_mayor/router.dart' as router;
@@ -7,6 +8,9 @@ import 'package:intl/date_symbol_data_local.dart';
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
   initializeDateFormatting("es_ES");
+  // await ?¿?¿'?
+  DbHelper.instance.init();
+
   Alarm.init();
 
   runApp(const MyApp());
