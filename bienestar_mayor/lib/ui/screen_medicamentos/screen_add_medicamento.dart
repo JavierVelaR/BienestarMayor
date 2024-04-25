@@ -1,5 +1,10 @@
+import 'package:alarm/alarm.dart';
+import 'package:alarm/model/alarm_settings.dart';
 import 'package:bienestar_mayor/database/dao/medicamento_dao.dart';
+import 'package:bienestar_mayor/database/dao/recordatorio_dao.dart';
 import 'package:bienestar_mayor/model/medicamento.dart';
+import 'package:bienestar_mayor/model/recordatorio.dart';
+import 'package:bienestar_mayor/router.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 
@@ -328,7 +333,7 @@ class _ScreenAddMedicamentoState extends State<ScreenAddMedicamento> {
           child: FilledButton(
               onPressed: (){
                 if(_guardarMedicamento()) {
-                  Navigator.of(context).pop();
+                  Navigator.pop(context, true);
                 }else{
                   showDialog(
                       context: context,
@@ -356,7 +361,8 @@ class _ScreenAddMedicamentoState extends State<ScreenAddMedicamento> {
   }
 
 
-  ///////////////// CONVERSOR DE NUMEROS A PALABRA ////////////////////
+  ///////////////// FUNCIONES AUXILIDARES ////////////////////
+  /// CONVERSOR DE NUMEROS A PALABRA
   String _toDate(int day, int monthNumber) {
     Map<int, String> months = {
       1: "enero",
@@ -377,10 +383,34 @@ class _ScreenAddMedicamentoState extends State<ScreenAddMedicamento> {
     return "$day de $month";
   }
 
+  /// Dice los dias que tiene el mes
+  int _daysInMonth(int month) {
+    switch (month) {
+      case 1: // enero
+      case 3: // marzo
+      case 5: // mayo
+      case 7: // julio
+      case 8: // agosto
+      case 10: // octubre
+      case 12: // diciembre
+        return 31;
+      case 4: // abril
+      case 6: // junio
+      case 9: // septiembre
+      case 11: // noviembre
+        return 30;
+      case 2: // febrero
+        int anio = DateTime.now().year;
+        return ((anio % 4 == 0 && anio % 100 != 0) || (anio % 400 == 0)) ? 29 : 28;
+      default:
+        return -1; // Valor inválido para el mes
+    }
+  }
+
 
   /////////////////// GUARDAR EN BASE DE DATOS ////////////////////////
-  ///TODO: insertar medicamento a db
-  ///devuelve true si se ha insertado correctamente
+
+  ///insertar medicamento a db, devuelve true si se ha insertado correctamente
   bool _guardarMedicamento() {
     String nombre = _nameController.text;
     String dosis = _dosisController.text;
@@ -398,18 +428,240 @@ class _ScreenAddMedicamentoState extends State<ScreenAddMedicamento> {
 
     final newMedicamento = Medicamento(nombre: nombre, dosis: dosisText, frecuencia: horasEntreToma, duracion: duracion);
 
-    /// Insertar medicamento en db
+    /// Insertar medicamento en db, crear los recordatorios e insertarlos en la db, y programar las alarmas
     _insertarEnDb(newMedicamento);
-
-    ///TODO: Una vez insertado el medicamento en la db, añadir los recordatorios a la db, y programar las alarmas
-
 
     return true;
   }
 
-  _insertarEnDb(Medicamento med) async{
+  // _insertarEnDb(Medicamento med) async{
+  //   final newId = await MedicamentoDao().insertMedicamento(med);
+  //   med = med.copyWith(id: newId);
+  //
+  //   int horasEntreToma = _horasEntreToma;
+  //   TimeOfDay? horaInicio = _horaInicio;
+  //   int duracion = _selectedDayRange.duration.inDays;
+  //   int mesActual = _selectedDayRange.start.month;
+  //   int diaActual = _selectedDayRange.start.day;
+  //   final vecesAlDia = 24/horasEntreToma;
+  //   TimeOfDay horaTomaActual = horaInicio!;
+  //
+  //   // Dia de la duracion del tratamiento
+  //   for(int dia=0; dia<duracion; dia++){
+  //     diaActual +=dia;
+  //     // Si en algun momento de la duracion del tratamiento supera los dias del mes, salta al siguiente mes
+  //     if(diaActual > _daysInMonth(mesActual)) {
+  //       mesActual++;
+  //       diaActual = 1;
+  //     }
+  //
+  //     for(int toma=0; toma<vecesAlDia; toma++){
+  //
+  //       // TODO: arreglar que la horaTomaActual sobrepasa las 24h
+  //       int horaCounter = horaTomaActual.hour;
+  //
+  //       // Asegúrate de que las horas no excedan las 24 horas en un día
+  //       horaCounter += horasEntreToma * toma;
+  //       if (horaCounter >= 24) {
+  //         // Si excede las 24 horas, ajusta las horas y el día
+  //         horaCounter %= 24;
+  //         diaActual++;
+  //         if (diaActual > _daysInMonth(mesActual)) {
+  //           mesActual++;
+  //           diaActual = 1;
+  //         }
+  //       }
+  //
+  //       horaTomaActual = TimeOfDay(hour: horaCounter, minute: horaTomaActual.minute);
+  //
+  //       // Crear recordatorio e insertarlo en la db
+  //       final newRecordatorio = Recordatorio(id_medicamento: med.id,
+  //           hora: "${_selectedDayRange.start.year}-$mesActual-${diaActual < 10 ? '0$diaActual' : diaActual} "
+  //               "${horaCounter < 10 ? '0$horaCounter' : horaCounter}:"
+  //               "${horaTomaActual.minute < 10 ? '0${horaTomaActual.minute}' : horaTomaActual.minute}");
+  //       _insertarRecordatorioEnDb(newRecordatorio);
+  //       debugPrint("----> Insertado recordatorio en db");
+  //
+  //       // Programar una alarma para ese recordatorio
+  //       _programarAlarma(mesActual, diaActual, horaCounter, horaTomaActual.minute);
+  //     }
+  //   }
+  //
+  // }
+
+  /// Segundo intento
+  // _insertarEnDb(Medicamento med) async{
+  //   final newId = await MedicamentoDao().insertMedicamento(med);
+  //   med = med.copyWith(id: newId);
+  //
+  //   int horasEntreToma = _horasEntreToma;
+  //   TimeOfDay? horaInicio = _horaInicio;
+  //   int duracion = _selectedDayRange.duration.inHours;
+  //   int mesActual = _selectedDayRange.start.month;
+  //   int diaActual = _selectedDayRange.start.day;
+  //   final vecesAlDia = 24/horasEntreToma;
+  //   int numToma = 0;
+  //
+  //   // Hora de la duracion del tratamiento
+  //   for(int hora=0; hora<duracion; hora += horasEntreToma){
+  //     int horaCounter = horaInicio!.hour;
+  //
+  //     horaCounter += horasEntreToma * numToma;
+  //     numToma++;
+  //
+  //     // Asegúrate de que las horas no excedan las 24 horas en un día
+  //     if (horaCounter >= 24) {
+  //       debugPrint("------> HoraCounter es mayor que 24h");
+  //       // Si excede las 24 horas, ajusta las horas y el día
+  //       horaCounter %= 24;
+  //       diaActual++;
+  //
+  //       // Si en algun momento de la duracion del tratamiento supera los dias del mes, salta al siguiente mes
+  //       if (diaActual > _daysInMonth(mesActual)) {
+  //         debugPrint("------> DiaActual es mayor que los dias del mes actual");
+  //         mesActual++;
+  //         diaActual = 1;
+  //       }
+  //     }
+  //
+  //     // Crear recordatorio e insertarlo en la db
+  //     final newRecordatorio = Recordatorio(id_medicamento: med.id,
+  //         hora: "${_selectedDayRange.start.year}-$mesActual-${diaActual < 10 ? '0$diaActual' : diaActual} "
+  //             "${horaCounter < 10 ? '0$horaCounter' : horaCounter}:"
+  //             "${horaInicio.minute < 10 ? '0${horaInicio.minute}' : horaInicio.minute}");
+  //     _insertarRecordatorioEnDb(newRecordatorio);
+  //     debugPrint("----> Insertado recordatorio en db");
+  //
+  //     // Programar una alarma para ese recordatorio
+  //     _programarAlarma(mesActual, diaActual, horaCounter, horaInicio.minute);
+  //   }
+  // }
+
+  /// GPT
+  // _insertarEnDb(Medicamento med) async {
+  //   final newId = await MedicamentoDao().insertMedicamento(med);
+  //   med = med.copyWith(id: newId);
+  //
+  //   int horasEntreToma = _horasEntreToma;
+  //   TimeOfDay? horaInicio = _horaInicio;
+  //   int duracion = _selectedDayRange.duration.inDays;
+  //   int mesActual = _selectedDayRange.start.month;
+  //   int diaActual = _selectedDayRange.start.day;
+  //   final vecesAlDia = 24 ~/ horasEntreToma; // Usa división entera para obtener la cantidad de veces al día
+  //   // TimeOfDay horaTomaActual = horaInicio!;
+  //
+  //   // Día de la duración del tratamiento
+  //   for (int dia = 0; dia < duracion; dia++) {
+  //     diaActual += dia;
+  //     // Si en algún momento de la duración del tratamiento supera los días del mes, salta al siguiente mes
+  //     if (diaActual > _daysInMonth(mesActual)) {
+  //       mesActual++;
+  //       diaActual = 1;
+  //     }
+  //
+  //     // Mantener el día actual constante para todas las tomas dentro del mismo día
+  //     int diaTomaActual = diaActual;
+  //
+  //     for (int toma = 0; toma < vecesAlDia; toma++) {
+  //       int horaCounter = horaInicio!.hour;
+  //       int minutoCounter = horaInicio.minute;
+  //
+  //       // Asegúrate de que las horas no excedan las 24 horas en un día
+  //       horaCounter += horasEntreToma * toma;
+  //       while (horaCounter >= 24) {
+  //         // Si excede las 24 horas, ajusta las horas y el día
+  //         horaCounter -= 24;
+  //         if (diaTomaActual > _daysInMonth(mesActual)) {
+  //           mesActual++;
+  //           diaTomaActual = 1;
+  //         }
+  //       }
+  //
+  //       // Crear recordatorio e insertarlo en la db
+  //       final newRecordatorio = Recordatorio(
+  //         id_medicamento: med.id,
+  //         hora: "${_selectedDayRange.start.year}-$mesActual-${diaTomaActual < 10 ? '0$diaTomaActual' : diaTomaActual} ${horaCounter < 10 ? '0$horaCounter' : horaCounter}:$minutoCounter",
+  //       );
+  //       _insertarRecordatorioEnDb(newRecordatorio);
+  //       debugPrint("----> Insertado recordatorio en db");
+  //
+  //       // Programar una alarma para ese recordatorio
+  //       _programarAlarma(mesActual, diaTomaActual, horaCounter, minutoCounter);
+  //     }
+  //   }
+  // }
+
+  /// GPT segundo intento
+  _insertarEnDb(Medicamento med) async {
     final newId = await MedicamentoDao().insertMedicamento(med);
-    med.copyWith(id: newId);
+    med = med.copyWith(id: newId);
+
+    TimeOfDay? horaInicio = _horaInicio;
+    int duracion = _selectedDayRange.duration.inHours;
+    int mesActual = _selectedDayRange.start.month;
+    int diaActual = _selectedDayRange.start.day;
+
+    // Función recursiva para programar los recordatorios
+    void programarRecordatorios(int horasRestantes, int hora, int minutos, int dia, int mes) {
+      if (horasRestantes <= 0) {
+        return; // Condición de salida de la recursión
+      }
+
+      // Crear recordatorio e insertarlo en la base de datos
+      final newRecordatorio = Recordatorio(
+        id_medicamento: med.id,
+        hora: "${_selectedDayRange.start.year}-$mes-${dia < 10 ? '0$dia' : dia} "
+            "${hora < 10 ? '0$hora' : hora}:"
+            "${minutos < 10 ? '0$minutos' : minutos}",
+      );
+      _insertarRecordatorioEnDb(newRecordatorio);
+      debugPrint("----> Insertado recordatorio en db");
+
+      // Programar una alarma para ese recordatorio
+      _programarAlarma(mes, dia, hora, minutos);
+
+      // Calcular la próxima hora de recordatorio
+      hora += _horasEntreToma;
+      minutos += (_horasEntreToma * 60);
+
+      // Ajustar las horas si exceden 24 horas en un día
+      if (hora >= 24) {
+        hora -= 24;
+        dia++;
+        if (dia > _daysInMonth(mes)) {
+          mes++;
+          dia = 1;
+        }
+      }
+      // Ajustar los minutos si exceden 60 minutos en una hora
+      minutos %= 60;
+
+      // Llamar recursivamente a la función con las horas restantes y las nuevas variables
+      programarRecordatorios(horasRestantes - _horasEntreToma, hora, minutos, dia, mes);
+    }
+
+    // Llamar a la función recursiva con las horas totales de duración y las variables iniciales
+    programarRecordatorios(duracion, horaInicio!.hour, horaInicio.minute, diaActual, mesActual);
+  }
+
+  _insertarRecordatorioEnDb(Recordatorio rec) async {
+    final newId = await RecordatorioDao().insertRecordatorio(rec);
+    rec = rec.copyWith(id: newId);
+  }
+
+  _programarAlarma(int mes, int dia, int hora, int minuto) async{
+    final alarmSettings = AlarmSettings(
+      id: 1,
+      dateTime: DateTime(2024, mes, dia, hora, minuto),
+      assetAudioPath: '../media/alarmaLluvia.mp3',
+      notificationTitle: 'Alarma de prueba',
+      notificationBody: 'Esta alarma es de prueba',
+      fadeDuration: 3.0,
+    );
+
+    // TODO: descomentar cuando quiera programar alarmas
+    // TODO: comprobar que la alarma que haya puesto no sea anterior a la fecha actual
+    // await Alarm.set(alarmSettings: alarmSettings);
   }
 
 }

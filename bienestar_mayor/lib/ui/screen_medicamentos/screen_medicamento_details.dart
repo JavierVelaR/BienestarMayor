@@ -1,12 +1,11 @@
 import 'package:bienestar_mayor/database/dao/medicamento_dao.dart';
-import 'package:flutter/cupertino.dart';
+import 'package:bienestar_mayor/database/dao/recordatorio_dao.dart';
+import 'package:bienestar_mayor/database/db_helper.dart';
+import 'package:bienestar_mayor/model/recordatorio.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 
 import '../../model/medicamento.dart';
-import '../../router.dart';
 import '../../theme/custom_colors.dart';
-import '../../widgets/drawer_custom.dart';
 
 class ScreenMedicamentoDetails extends StatefulWidget {
   final Medicamento _medicamento;
@@ -71,7 +70,7 @@ class _ScreenMedicamentoDetailsState extends State<ScreenMedicamentoDetails> {
                 ),
               ),
               Text(
-                "Frecuencia: cada ${widget._medicamento.duracion} horas",
+                "Frecuencia: cada ${widget._medicamento.frecuencia} horas",
                 style: const TextStyle(
                   fontSize: 20,
                 ),
@@ -118,8 +117,18 @@ class _ScreenMedicamentoDetailsState extends State<ScreenMedicamentoDetails> {
                                       fontSize: 20,
                                     ))),
                             TextButton(
-                                onPressed: () {
-                                  ///TODO: Eliminar medicamento y recordatorios de la db
+                                onPressed: () async{
+                                  // Eliminar medicamento y recordatorios de la db
+                                  final query = await DbHelper.instance.db.query(
+                                      RecordatorioDao().tableName, where: "id_medicamento = ?", whereArgs: [widget._medicamento.id]);
+
+                                  final listaRecordatorios = query.map((e) => Recordatorio.fromMap(e)).toList();
+
+                                  for(Recordatorio rec in listaRecordatorios){
+                                    RecordatorioDao().deleteRecordatorio(rec);
+                                    // debugPrint("Recordatorio eliminado: id -> ${rec.id}");
+                                  }
+
                                   MedicamentoDao().deleteMedicamento(widget._medicamento);
 
                                   /// TODO: mostrar texto que se ha eliminado con exito
@@ -127,7 +136,7 @@ class _ScreenMedicamentoDetailsState extends State<ScreenMedicamentoDetails> {
 
                                   // Salir de Dialog y salir a pantalla de listado de medicamentos
                                   Navigator.pop(context);
-                                  Navigator.pop(context);
+                                  Navigator.pop(context, true);
                                 },
                                 child: const Text("Sí",
                                     style: TextStyle(

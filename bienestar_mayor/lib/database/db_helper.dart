@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
 
@@ -39,7 +40,8 @@ class DbHelper{
       'CREATE TABLE eventos('
       'id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, '
       'titulo TEXT, '
-      'descripcion TEXT)';
+      'descripcion TEXT,'
+      'fecha TEXT)';
 
   init() async{
     // deleteDatabase(join( await getDatabasesPath(), 'BienestarMayor_database.db'));
@@ -56,7 +58,6 @@ class DbHelper{
       },
       version: 1,
     );
-
   }
 
 }
