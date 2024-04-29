@@ -34,9 +34,10 @@ class _ScreenCalendarState extends State<ScreenCalendar> {
     _cargarEventosDia();
   }
 
-  /// TODO: No se ven los marcadores de evento
   List<Evento> _getEventsFromDay(DateTime date) {
-    return _selectedEvents[date] ?? [];
+    // Copiando la fecha argumentos, si que se cargan bien, sino no devuelve nada
+    final fecha = DateTime(date.year, date.month, date.day);
+    return _selectedEvents[fecha] ?? [];
   }
 
   @override
@@ -51,11 +52,14 @@ class _ScreenCalendarState extends State<ScreenCalendar> {
         },
       ),
       floatingActionButton: _floatingActionButton(),
-      body: Column(
-        children: [
-          _calendar(),
-          PanelEventos(_listaEventosDia),
-        ],
+      body: SingleChildScrollView(
+        child: Column(
+          children: [
+            _calendar(),
+            // TODO: Se tienen que ver 2 eventos, y el tercero aparecer deslizando, aparece el 3º en blanco
+            PanelEventos(_listaEventosDia),
+          ],
+        ),
       ),
     );
   }
@@ -80,140 +84,162 @@ class _ScreenCalendarState extends State<ScreenCalendar> {
 
   /// Boton para añadir evento y programar notificación
   _floatingActionButton() => FloatingActionButton(
+        onPressed: _addEvent,
         child: const Icon(
           Icons.add,
           size: 34,
         ),
-        onPressed: () async{
-          final tituloController = TextEditingController();
-          final descripcionController = TextEditingController();
-          final diaController = TextEditingController();
-          diaController.text = _selectedDay.day.toString();
-          final mesController = TextEditingController();
-          mesController.text = _selectedDay.month.toString();
+      );
 
-          final result = await showDialog(
-              context: context,
-              builder: (_) => AlertDialog(
-                    title: const Text("Añadir evento"),
-                    titleTextStyle: const TextStyle(
-                        fontSize: 28,
-                        fontWeight: FontWeight.w500,
-                        color: Colors.black),
-                    content: Padding(
-                      padding: const EdgeInsets.all(10.0),
-                      child: SingleChildScrollView(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.start,
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const Text("Título", style: TextStyle(fontSize: 22, fontWeight: FontWeight.w500, color: CustomColors.zafiro)),
-                            SizedBox(
-                              width: 300,
-                              child: TextFormField(
-                                controller: tituloController,
-                                decoration: const InputDecoration(
-                                  hintText: "Introduce el título",
-                                  hintStyle: TextStyle(fontSize: 18),
-                                  suffixIcon: Icon(Icons.edit),
-                                ),
-                              ),
-                            ),
-                            const SizedBox(height: 20,),
-                            const Text("Descripción", style: TextStyle(fontSize: 22, fontWeight: FontWeight.w500, color: CustomColors.zafiro)),
-                            SizedBox(
-                              width: 300,
-                              child: TextFormField(
-                                controller: descripcionController,
-                                decoration: const InputDecoration(
-                                  hintText: "Descripción del evento",
-                                  hintStyle: TextStyle(fontSize: 18),
-                                  suffixIcon: Icon(Icons.edit),
-                                ),
-                              ),
-                            ),
-                            const SizedBox(height: 20,),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceAround,
-                              children: [
-                                const Text("Día:", style: TextStyle(fontSize: 20, fontWeight: FontWeight.w500, color: CustomColors.zafiro)),
-                                SizedBox(
-                                  width: 40,
-                                  child: TextFormField(
-                                    controller: diaController,
-                                    keyboardType: TextInputType.number,
-                                    textAlign: TextAlign.center,
-                                    style: const TextStyle(fontSize: 20),
-                                    maxLength: 2,
-                                  ),
-                                ),
-                                const SizedBox(width: 20,),
-                                const Text("Mes:", style: TextStyle(fontSize: 20, fontWeight: FontWeight.w500, color: CustomColors.zafiro)),
-                                SizedBox(
-                                  width: 40,
-                                  child: TextFormField(
-                                    controller: mesController,
-                                    keyboardType: TextInputType.number,
-                                    textAlign: TextAlign.center,
-                                    style: const TextStyle(fontSize: 20),
-                                    maxLength: 2,
-                                  ),
-                                ),
-                              ],
-                            ),
-                            /////////////////////////////
-                          ],
+  _addEvent() async {
+    final tituloController = TextEditingController();
+    final descripcionController = TextEditingController();
+    final diaController = TextEditingController();
+    diaController.text = _selectedDay.day.toString();
+    final mesController = TextEditingController();
+    mesController.text = _selectedDay.month.toString();
+
+    final result = await showDialog(
+        context: context,
+        builder: (_) => AlertDialog(
+              title: const Text("Añadir evento"),
+              titleTextStyle: const TextStyle(
+                  fontSize: 28,
+                  fontWeight: FontWeight.w500,
+                  color: Colors.black),
+              content: SingleChildScrollView(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text("Título",
+                        style: TextStyle(
+                            fontSize: 22,
+                            fontWeight: FontWeight.w500,
+                            color: CustomColors.zafiro)),
+                    SizedBox(
+                      width: 300,
+                      child: TextFormField(
+                        controller: tituloController,
+                        decoration: const InputDecoration(
+                          hintText: "Introduce el título",
+                          hintStyle: TextStyle(fontSize: 18),
+                          suffixIcon: Icon(Icons.edit),
                         ),
                       ),
                     ),
-                    actions: [
-                      ElevatedButton(
-                        onPressed: () {
-                          Navigator.pop(context);
-                        },
-                        child: const Text(
-                          "Cancelar",
-                          style: TextStyle(color: Colors.red),
+                    const SizedBox(
+                      height: 20,
+                    ),
+                    const Text("Descripción",
+                        style: TextStyle(
+                            fontSize: 22,
+                            fontWeight: FontWeight.w500,
+                            color: CustomColors.zafiro)),
+                    SizedBox(
+                      width: 300,
+                      child: TextFormField(
+                        controller: descripcionController,
+                        decoration: const InputDecoration(
+                          hintText: "Descripción del evento",
+                          hintStyle: TextStyle(fontSize: 18),
+                          suffixIcon: Icon(Icons.edit),
                         ),
                       ),
-                      ElevatedButton(
-                        onPressed: () {
-                          if(tituloController.text.isNotEmpty && descripcionController.text.isNotEmpty &&
-                              diaController.text.isNotEmpty && StringUtils.esNumero(diaController.text) &&
-                              mesController.text.isNotEmpty && StringUtils.esNumero(mesController.text)) {
-                            final dia = diaController.text;
-                            final mes = mesController.text;
-                            int anio = _selectedDay.year;
-
-                            final event =
-                              Evento(titulo: tituloController.text, descripcion: descripcionController.text,
-                                  fecha: "$anio-${int.parse(mes) < 10 ? '0$mes' : mes}-${int.parse(dia) < 10 ? '0$dia' : dia}");
-
-                            // Insertar evento a la db
-                            _guardarEvento(event);
-
-                            // Actualizar eventos del dia seleccionado
-                            _cargarEventosDia();
-
-                            // TODO: programar notificación para que salga el dia anterior y/o el mismo dia
-                            if(DateTime(anio,int.parse(mes),int.parse(dia)).isAfter(DateTime.now())) {
-                                // Programar notificación
-
-                              }
-
-                            Navigator.pop(context, true);
-                          }
-                        },
-                        child: const Text(
-                          "Aceptar",
-                          style: TextStyle(color: Colors.blue),
+                    ),
+                    // const SizedBox(height: 10,),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceAround,
+                      children: [
+                        const Text("Día:",
+                            style: TextStyle(
+                                fontSize: 20,
+                                fontWeight: FontWeight.w500,
+                                color: CustomColors.zafiro)),
+                        SizedBox(
+                          width: 40,
+                          child: TextFormField(
+                            controller: diaController,
+                            keyboardType: TextInputType.number,
+                            textAlign: TextAlign.center,
+                            style: const TextStyle(fontSize: 20),
+                            maxLength: 2,
+                          ),
                         ),
-                      ),
-                    ],
-                  ));
-          if(result != null && result as bool && mounted) _cargarEventos();
-        },
-      );
+                        const SizedBox(),
+                        const Text("Mes:",
+                            style: TextStyle(
+                                fontSize: 20,
+                                fontWeight: FontWeight.w500,
+                                color: CustomColors.zafiro)),
+                        SizedBox(
+                          width: 40,
+                          child: TextFormField(
+                            controller: mesController,
+                            keyboardType: TextInputType.number,
+                            textAlign: TextAlign.center,
+                            style: const TextStyle(fontSize: 20),
+                            maxLength: 2,
+                          ),
+                        ),
+                      ],
+                    ),
+                    /////////////////////////////
+                  ],
+                ),
+              ),
+              actions: [
+                ElevatedButton(
+                  onPressed: () {
+                    Navigator.pop(context);
+                  },
+                  child: const Text(
+                    "Cancelar",
+                    style: TextStyle(color: Colors.red),
+                  ),
+                ),
+                ElevatedButton(
+                  onPressed: () {
+                    if (tituloController.text.isNotEmpty &&
+                        descripcionController.text.isNotEmpty &&
+                        diaController.text.isNotEmpty &&
+                        StringUtils.esNumero(diaController.text) &&
+                        mesController.text.isNotEmpty &&
+                        StringUtils.esNumero(mesController.text)) {
+                      final dia = diaController.text;
+                      final mes = mesController.text;
+                      int anio = _selectedDay.year;
+
+                      final event = Evento(
+                          titulo: tituloController.text,
+                          descripcion: descripcionController.text,
+                          fecha:
+                              "$anio-${int.parse(mes) < 10 ? '0$mes' : mes}-${int.parse(dia) < 10 ? '0$dia' : dia}");
+
+                      // Insertar evento a la db
+                      _guardarEvento(event);
+
+                      // Actualizar eventos del dia seleccionado
+                      _cargarEventosDia();
+
+                      // TODO: programar notificación para que salga el dia anterior y/o el mismo dia
+                      if (DateTime(anio, int.parse(mes), int.parse(dia))
+                          .isAfter(DateTime.now())) {
+                        // Programar notificación
+                      }
+
+                      Navigator.pop(context, true);
+                    }
+                  },
+                  child: const Text(
+                    "Aceptar",
+                    style: TextStyle(color: Colors.blue),
+                  ),
+                ),
+              ],
+            ));
+    if (result != null && result as bool && mounted) _cargarEventos();
+  }
 
   /// Insertar evento en la db
   _guardarEvento(Evento event) async{
@@ -291,9 +317,13 @@ class _ScreenCalendarState extends State<ScreenCalendar> {
         ),
 
         // Marcadores de eventos (como max 3, al clickar, abajo se verán todos)
-        markerSize: 10,
-        markersMaxCount: 3,
-      ),
+          markerSize: 9,
+          markersMaxCount: 3,
+          markerMargin: EdgeInsets.symmetric(horizontal: 0.8),
+          markerDecoration: BoxDecoration(
+              // TODO: color de la categoría
+              color: Colors.red,
+              borderRadius: BorderRadius.all(Radius.circular(100)))),
 
       onFormatChanged: (CalendarFormat format) {
         setState(() {
@@ -306,6 +336,8 @@ class _ScreenCalendarState extends State<ScreenCalendar> {
           _selectedDay = day;
           _focusedDay = focusedDay;
           _cargarEventosDia();
+          debugPrint(
+              "<-----------> Se cargan los eventos del dia ${day.day} de ${day.month}");
         });
       },
 

@@ -1,10 +1,8 @@
-import 'package:alarm/alarm.dart';
 import 'package:alarm/model/alarm_settings.dart';
 import 'package:bienestar_mayor/database/dao/medicamento_dao.dart';
 import 'package:bienestar_mayor/database/dao/recordatorio_dao.dart';
 import 'package:bienestar_mayor/model/medicamento.dart';
 import 'package:bienestar_mayor/model/recordatorio.dart';
-import 'package:bienestar_mayor/router.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 
@@ -114,8 +112,8 @@ class _ScreenAddMedicamentoState extends State<ScreenAddMedicamento> {
         dropdownMenuEntries: const [
           DropdownMenuEntry(value: 'mg', label: 'miligramos'),
           DropdownMenuEntry(value: 'ml', label: 'mililitros'),
-          DropdownMenuEntry(value: 'Sin dosis especificada', label: 'Sin especificar'),
-        ],
+              // DropdownMenuEntry(value: 'Sin dosis especificada', label: 'Sin especificar'),
+            ],
         onSelected: (value){ value!=null ? _tipoDosis = value : _tipoDosis = ""; },
       )
     ],

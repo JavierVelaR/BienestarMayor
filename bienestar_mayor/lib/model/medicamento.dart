@@ -24,7 +24,10 @@ class Medicamento{
 
   factory Medicamento.fromMap(Map<String, dynamic> map){
     return Medicamento(id: map['id'], nombre: map['nombre'],
-        dosis: map['dosis'], frecuencia: map['frecuencia'], duracion: map['duracion'], foto: map['foto']);
+        dosis: map['dosis'] ?? '',
+        frecuencia: map['frecuencia'],
+        duracion: map['duracion'],
+        foto: map['foto'] ?? '');
   }
 
   Map<String, Object> toMap(){
@@ -35,8 +38,8 @@ class Medicamento{
     };
 
     if(id!=-1) map['id'] = id;
-    if(!dosis.contains("especificada")) map['dosis'] = dosis;
-    if(foto!=null) map['foto'] = foto!;
+    if (dosis.contains("especificada")) map['dosis'] = dosis;
+    if (foto != null && foto!.isNotEmpty) map['foto'] = foto!;
 
     return map;
   }

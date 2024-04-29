@@ -58,6 +58,9 @@ class DbHelper{
       },
       version: 1,
     );
+
+    debugPrint("---------> PATH: ${_db?.path}");
+    // debugPrint("---------> PATH: ${getDatabasePath("mybasededatos.db").getAbsolutePath()}");
   }
 
 }
