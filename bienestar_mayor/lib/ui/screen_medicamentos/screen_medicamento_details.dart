@@ -1,16 +1,21 @@
+import 'dart:io';
+
 import 'package:bienestar_mayor/database/dao/medicamento_dao.dart';
 import 'package:bienestar_mayor/database/dao/recordatorio_dao.dart';
 import 'package:bienestar_mayor/database/db_helper.dart';
 import 'package:bienestar_mayor/model/recordatorio.dart';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 
 import '../../model/medicamento.dart';
 import '../../theme/custom_colors.dart';
 
 class ScreenMedicamentoDetails extends StatefulWidget {
   final Medicamento _medicamento;
+  final Function() _function;
 
-  const ScreenMedicamentoDetails(this._medicamento, {super.key});
+  const ScreenMedicamentoDetails(this._medicamento, this._function,
+      {super.key});
 
   @override
   State<ScreenMedicamentoDetails> createState() =>
@@ -18,6 +23,18 @@ class ScreenMedicamentoDetails extends StatefulWidget {
 }
 
 class _ScreenMedicamentoDetailsState extends State<ScreenMedicamentoDetails> {
+  String _fotoPath = "";
+  XFile? _pickedFile;
+  bool _tieneFoto = false;
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget._medicamento.foto != null)
+      _fotoPath = XFile(widget._medicamento.foto!).path;
+    if (_fotoPath.isNotEmpty) _tieneFoto = true;
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -30,59 +47,101 @@ class _ScreenMedicamentoDetailsState extends State<ScreenMedicamentoDetails> {
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.startFloat,
       floatingActionButton: _floatingActionButton(),
-      body: Container(
-          padding: const EdgeInsets.all(8),
-          child: Column(
-            children: [
-              widget._medicamento.foto != null
-                  ? Container(
-                      ///TODO: si tiene imagen, mostrarla y si no, poner boton para añadirla
-                      width: MediaQuery.sizeOf(context).width,
-                      height: MediaQuery.sizeOf(context).height / 3,
-                      alignment: Alignment.center,
-                      // child: Image(image: AssetImage,),
-                    )
-                  : Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      children: [
-                        const Text(
-                          "Añadir imagen:",
-                          style: TextStyle(fontSize: 24),
+      body: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: Column(
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                _fotoPath.isNotEmpty
+                    ? Column(children: [
+                        Container(
+                          width: MediaQuery.sizeOf(context).width / 1.75,
+                          height: MediaQuery.sizeOf(context).height / 3.75,
+                          alignment: Alignment.center,
+                          // decoration: BoxDecoration(
+                          //   border: Border.all(color: Colors.black),
+                          //   borderRadius: const BorderRadius.all(Radius.circular(20))
+                          // ),
+                          child: Image.file(File(XFile(_fotoPath).path)),
                         ),
-                        ElevatedButton(
-                            onPressed: () {
-                              /// TODO: hacer update al medicamento añadiendo foto
-
-                            },
-                            child: const Icon(Icons.image))
-                      ],
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                          children: [
+                            const Text(
+                              "Cambiar imagen:",
+                              style: TextStyle(fontSize: 24),
+                            ),
+                            const SizedBox(
+                              width: 20,
+                            ),
+                            _botonCambiarImagen(),
+                          ],
+                        ),
+                      ])
+                    : Column(
+                        children: [
+                          Container(
+                              decoration: BoxDecoration(
+                                  border: Border.all(color: Colors.black),
+                                  borderRadius: const BorderRadius.all(
+                                      Radius.circular(30))),
+                              child: const Icon(
+                                Icons.medication,
+                                size: 200,
+                                color: Colors.grey,
+                              )),
+                          const SizedBox(
+                            height: 10,
+                          ),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                            children: [
+                              const Text(
+                                "Añadir imagen:",
+                                style: TextStyle(fontSize: 24),
+                              ),
+                              const SizedBox(
+                                width: 20,
+                              ),
+                              _botonCambiarImagen(),
+                            ],
+                          ),
+                        ],
                     ),
-              Text(
-                "Nombre: ${widget._medicamento.nombre}",
-                style: const TextStyle(
-                  fontSize: 20,
-                ),
+              ],
+            ),
+            const SizedBox(
+              height: 30,
+            ),
+            Text(
+              "Nombre: ${widget._medicamento.nombre}",
+              style: const TextStyle(
+                fontSize: 20,
               ),
-              Text(
-                "Dosis: ${widget._medicamento.dosis}",
-                style: const TextStyle(
-                  fontSize: 20,
-                ),
+            ),
+            Text(
+              "Dosis: ${widget._medicamento.dosis}",
+              style: const TextStyle(
+                fontSize: 20,
               ),
-              Text(
-                "Frecuencia: cada ${widget._medicamento.frecuencia} horas",
-                style: const TextStyle(
-                  fontSize: 20,
-                ),
+            ),
+            Text(
+              "Frecuencia: cada ${widget._medicamento.frecuencia} horas",
+              style: const TextStyle(
+                fontSize: 20,
               ),
-              Text(
-                "Duración: ${widget._medicamento.duracion} días",
-                style: const TextStyle(
-                  fontSize: 20,
-                ),
+            ),
+            Text(
+              "Duración: ${widget._medicamento.duracion} días",
+              style: const TextStyle(
+                fontSize: 20,
               ),
-            ],
-          )),
+            ),
+          ],
+        ),
+      ),
     );
   }
 
@@ -131,8 +190,18 @@ class _ScreenMedicamentoDetailsState extends State<ScreenMedicamentoDetails> {
 
                                   MedicamentoDao().deleteMedicamento(widget._medicamento);
 
-                                  /// TODO: mostrar texto que se ha eliminado con exito
+                                  // TODO: IMPORTANTE FUTURO, eliminar las alarmas programadas
 
+                                  // /// TODO: mostrar texto que se ha eliminado con exito ¿?
+                                  // showDialog(
+                                  //     context: context,
+                                  //     builder: (_) => AlertDialog(
+                                  //       title: const Text("Se ha borrado con éxito"),
+                                  //       actions: [
+                                  //         TextButton(onPressed: (){Navigator.pop(context);}, child: const Text("Vale"))
+                                  //       ],
+                                  //     ),
+                                  //     );
 
                                   // Salir de Dialog y salir a pantalla de listado de medicamentos
                                   Navigator.pop(context);
@@ -146,4 +215,74 @@ class _ScreenMedicamentoDetailsState extends State<ScreenMedicamentoDetails> {
               }),
         ),
       );
+
+  _botonCambiarImagen() => ElevatedButton(
+      onPressed: () async {
+        showDialog(
+          context: context,
+          builder: (context) => AlertDialog(
+            title: _tieneFoto
+                ? const Text("¿Quieres cambiar la foto?")
+                : const Text(
+                    "¿Quieres tomar una foto o cargarla de la galería?"),
+            alignment: Alignment.center,
+            shadowColor: Colors.black,
+            elevation: 10,
+            actionsAlignment: MainAxisAlignment.end,
+            actions: [
+              TextButton(
+                  onPressed: () async {
+                    _pickedFile = await ImagePicker()
+                        .pickImage(source: ImageSource.camera);
+                    if (_pickedFile != null && _pickedFile!.path.isNotEmpty) {
+                      setState(() {
+                        _fotoPath = _pickedFile!.path;
+                      });
+
+                      // Actualizar medicamento de la db, añadiendole foto
+                      Medicamento updatedMed =
+                          widget._medicamento.copyWith(foto: _fotoPath);
+                      _addFoto(updatedMed);
+
+                      // Llamar a la funcion de la pantalla padre, actualizando los medicamentos de la lista
+                      widget._function();
+
+                      Navigator.pop(context);
+                    }
+                  },
+                  child: const Text("Tomar foto")),
+              TextButton(
+                  onPressed: () async {
+                    _pickedFile = await ImagePicker()
+                        .pickImage(source: ImageSource.gallery);
+                    if (_pickedFile != null && _pickedFile!.path.isNotEmpty) {
+                      setState(() {
+                        _fotoPath = _pickedFile!.path;
+                      });
+
+                      Medicamento updatedMed =
+                          widget._medicamento.copyWith(foto: _fotoPath);
+                      _addFoto(updatedMed);
+                      widget._function();
+
+                      Navigator.pop(context);
+                    }
+                  },
+                  child: const Text("Cargar foto")),
+              TextButton(
+                  onPressed: () {
+                    Navigator.pop(context);
+                  },
+                  child: const Text("No")),
+            ],
+          ),
+        );
+      },
+      child: const Icon(
+        Icons.image,
+      ));
+
+  _addFoto(Medicamento med) {
+    MedicamentoDao().updateMedicamento(med);
+  }
 }

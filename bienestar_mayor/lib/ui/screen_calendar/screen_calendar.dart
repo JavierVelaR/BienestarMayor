@@ -56,7 +56,6 @@ class _ScreenCalendarState extends State<ScreenCalendar> {
         child: Column(
           children: [
             _calendar(),
-            // TODO: Se tienen que ver 2 eventos, y el tercero aparecer deslizando, aparece el 3º en blanco
             PanelEventos(_listaEventosDia, _borrarEvento),
           ],
         ),

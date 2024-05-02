@@ -23,6 +23,8 @@ class _ScreenAddMedicamentoState extends State<ScreenAddMedicamento> {
   TimeOfDay? _horaInicio;
   DateTimeRange _selectedDayRange = DateTimeRange(start: DateTime.now(), end: DateTime.now().add(const Duration(days: 7)));
   XFile? _pickedFile;
+  String _pickedFilePath = "";
+  bool _fotoCogida = false;
 
   @override
   Widget build(BuildContext context) {
@@ -114,7 +116,7 @@ class _ScreenAddMedicamentoState extends State<ScreenAddMedicamento> {
           DropdownMenuEntry(value: 'ml', label: 'mililitros'),
               // DropdownMenuEntry(value: 'Sin dosis especificada', label: 'Sin especificar'),
             ],
-        onSelected: (value){ value!=null ? _tipoDosis = value : _tipoDosis = ""; },
+            onSelected: (value){ value!=null ? _tipoDosis = value : _tipoDosis = ""; },
       )
     ],
   );
@@ -196,10 +198,20 @@ class _ScreenAddMedicamentoState extends State<ScreenAddMedicamento> {
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         const Text("Hora de inicio:", style: TextStyle(fontSize: 20),),
-        const SizedBox(width: 10,),
+        const SizedBox(
+          width: 8,
+        ),
         _horaInicio!=null
-            ? Text("${_horaInicio!.hour}:${_horaInicio!.minute} ", style: const TextStyle(fontSize: 20),)
-            : ElevatedButton(
+            ? Text(
+                "${_horaInicio!.hour < 10 ? "0${_horaInicio!.hour}" : _horaInicio!.hour}:"
+                "${_horaInicio!.minute < 10 ? "0${_horaInicio!.minute}" : _horaInicio!.minute} ",
+                style: const TextStyle(fontSize: 20),
+              )
+            : const Text("00:00"),
+        const SizedBox(
+          width: 8,
+        ),
+        ElevatedButton(
             onPressed: (){
               _selectHora(_horasEntreToma);
             },
@@ -257,7 +269,6 @@ class _ScreenAddMedicamentoState extends State<ScreenAddMedicamento> {
   }
 
   _addPhoto(){
-    bool fotoCogida = false;
 
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -265,26 +276,26 @@ class _ScreenAddMedicamentoState extends State<ScreenAddMedicamento> {
         const Text("Añadir foto:", style: TextStyle(fontSize: 22, fontWeight: FontWeight.w500),),
         ElevatedButton(
             onPressed: () async{
-              // código para añadir foto
-
               showDialog(
                   context: context,
                   builder: (context) => AlertDialog(
-                    title: fotoCogida ? const Text("Ya has seleccionado una foto, ¿quieres cambiarla?")
-                    : const Text("¿Quieres tomar una foto o cargarla de la galería?"),
+                  title: _fotoCogida
+                      ? const Text(
+                          "Ya has seleccionado una foto, ¿quieres cambiarla?")
+                      : const Text("¿Quieres tomar una foto o cargarla de la galería?"),
                     alignment: Alignment.center,
                     shadowColor: Colors.black,
                     elevation: 10,
                     actionsAlignment: MainAxisAlignment.end,
                     actions: [
-                      /// TODO: arreglar toma y carga de imagenes
                       TextButton(
                           onPressed: () async{
                             _pickedFile = await ImagePicker().pickImage(source: ImageSource.camera);
                             if(_pickedFile != null && _pickedFile!.path.isNotEmpty){
-                              setState(() {
-                                fotoCogida = true;
-                              });
+                            _pickedFilePath = _pickedFile!.path;
+                            setState(() {
+                              _fotoCogida = true;
+                            });
                               Navigator.pop(context);
                             }
                           },
@@ -293,9 +304,11 @@ class _ScreenAddMedicamentoState extends State<ScreenAddMedicamento> {
                           onPressed: () async{
                             _pickedFile = await ImagePicker().pickImage(source: ImageSource.gallery);
                             if(_pickedFile != null && _pickedFile!.path.isNotEmpty){
-                              setState(() {
-                                fotoCogida = true;
-                              });
+                            _pickedFilePath = _pickedFile!.path;
+                            final file = XFile(_pickedFilePath);
+                            setState(() {
+                              _fotoCogida = true;
+                            });
                               Navigator.pop(context);
                             }
                           },
@@ -306,7 +319,12 @@ class _ScreenAddMedicamentoState extends State<ScreenAddMedicamento> {
               );
 
             },
-            child: fotoCogida ? const Icon(Icons.verified, size: 30, color: CustomColors.verdeLima,)
+            child: _fotoCogida
+                ? const Icon(
+                    Icons.verified,
+                    size: 30,
+                    color: CustomColors.verdeLima,
+                  )
                 : const Text("Añadir foto", style: TextStyle(fontSize: 16))),
       ],
     );
@@ -424,7 +442,12 @@ class _ScreenAddMedicamentoState extends State<ScreenAddMedicamento> {
     debugPrint("Nombre: $nombre, dosis: $dosisText, horas entre cada toma: $horasEntreToma, hora de inicio de las tomas: $horaInicio, "
         "duración: $duracion días}");
 
-    final newMedicamento = Medicamento(nombre: nombre, dosis: dosisText, frecuencia: horasEntreToma, duracion: duracion);
+    final newMedicamento = Medicamento(
+        nombre: nombre,
+        dosis: dosisText,
+        frecuencia: horasEntreToma,
+        duracion: duracion,
+        foto: _pickedFilePath.isEmpty ? "" : _pickedFilePath);
 
     /// Insertar medicamento en db, crear los recordatorios e insertarlos en la db, y programar las alarmas
     _insertarEnDb(newMedicamento);
@@ -432,164 +455,8 @@ class _ScreenAddMedicamentoState extends State<ScreenAddMedicamento> {
     return true;
   }
 
-  // _insertarEnDb(Medicamento med) async{
-  //   final newId = await MedicamentoDao().insertMedicamento(med);
-  //   med = med.copyWith(id: newId);
-  //
-  //   int horasEntreToma = _horasEntreToma;
-  //   TimeOfDay? horaInicio = _horaInicio;
-  //   int duracion = _selectedDayRange.duration.inDays;
-  //   int mesActual = _selectedDayRange.start.month;
-  //   int diaActual = _selectedDayRange.start.day;
-  //   final vecesAlDia = 24/horasEntreToma;
-  //   TimeOfDay horaTomaActual = horaInicio!;
-  //
-  //   // Dia de la duracion del tratamiento
-  //   for(int dia=0; dia<duracion; dia++){
-  //     diaActual +=dia;
-  //     // Si en algun momento de la duracion del tratamiento supera los dias del mes, salta al siguiente mes
-  //     if(diaActual > _daysInMonth(mesActual)) {
-  //       mesActual++;
-  //       diaActual = 1;
-  //     }
-  //
-  //     for(int toma=0; toma<vecesAlDia; toma++){
-  //
-  //       // TODO: arreglar que la horaTomaActual sobrepasa las 24h
-  //       int horaCounter = horaTomaActual.hour;
-  //
-  //       // Asegúrate de que las horas no excedan las 24 horas en un día
-  //       horaCounter += horasEntreToma * toma;
-  //       if (horaCounter >= 24) {
-  //         // Si excede las 24 horas, ajusta las horas y el día
-  //         horaCounter %= 24;
-  //         diaActual++;
-  //         if (diaActual > _daysInMonth(mesActual)) {
-  //           mesActual++;
-  //           diaActual = 1;
-  //         }
-  //       }
-  //
-  //       horaTomaActual = TimeOfDay(hour: horaCounter, minute: horaTomaActual.minute);
-  //
-  //       // Crear recordatorio e insertarlo en la db
-  //       final newRecordatorio = Recordatorio(id_medicamento: med.id,
-  //           hora: "${_selectedDayRange.start.year}-$mesActual-${diaActual < 10 ? '0$diaActual' : diaActual} "
-  //               "${horaCounter < 10 ? '0$horaCounter' : horaCounter}:"
-  //               "${horaTomaActual.minute < 10 ? '0${horaTomaActual.minute}' : horaTomaActual.minute}");
-  //       _insertarRecordatorioEnDb(newRecordatorio);
-  //       debugPrint("----> Insertado recordatorio en db");
-  //
-  //       // Programar una alarma para ese recordatorio
-  //       _programarAlarma(mesActual, diaActual, horaCounter, horaTomaActual.minute);
-  //     }
-  //   }
-  //
-  // }
-
-  /// Segundo intento
-  // _insertarEnDb(Medicamento med) async{
-  //   final newId = await MedicamentoDao().insertMedicamento(med);
-  //   med = med.copyWith(id: newId);
-  //
-  //   int horasEntreToma = _horasEntreToma;
-  //   TimeOfDay? horaInicio = _horaInicio;
-  //   int duracion = _selectedDayRange.duration.inHours;
-  //   int mesActual = _selectedDayRange.start.month;
-  //   int diaActual = _selectedDayRange.start.day;
-  //   final vecesAlDia = 24/horasEntreToma;
-  //   int numToma = 0;
-  //
-  //   // Hora de la duracion del tratamiento
-  //   for(int hora=0; hora<duracion; hora += horasEntreToma){
-  //     int horaCounter = horaInicio!.hour;
-  //
-  //     horaCounter += horasEntreToma * numToma;
-  //     numToma++;
-  //
-  //     // Asegúrate de que las horas no excedan las 24 horas en un día
-  //     if (horaCounter >= 24) {
-  //       debugPrint("------> HoraCounter es mayor que 24h");
-  //       // Si excede las 24 horas, ajusta las horas y el día
-  //       horaCounter %= 24;
-  //       diaActual++;
-  //
-  //       // Si en algun momento de la duracion del tratamiento supera los dias del mes, salta al siguiente mes
-  //       if (diaActual > _daysInMonth(mesActual)) {
-  //         debugPrint("------> DiaActual es mayor que los dias del mes actual");
-  //         mesActual++;
-  //         diaActual = 1;
-  //       }
-  //     }
-  //
-  //     // Crear recordatorio e insertarlo en la db
-  //     final newRecordatorio = Recordatorio(id_medicamento: med.id,
-  //         hora: "${_selectedDayRange.start.year}-$mesActual-${diaActual < 10 ? '0$diaActual' : diaActual} "
-  //             "${horaCounter < 10 ? '0$horaCounter' : horaCounter}:"
-  //             "${horaInicio.minute < 10 ? '0${horaInicio.minute}' : horaInicio.minute}");
-  //     _insertarRecordatorioEnDb(newRecordatorio);
-  //     debugPrint("----> Insertado recordatorio en db");
-  //
-  //     // Programar una alarma para ese recordatorio
-  //     _programarAlarma(mesActual, diaActual, horaCounter, horaInicio.minute);
-  //   }
-  // }
-
-  /// GPT
-  // _insertarEnDb(Medicamento med) async {
-  //   final newId = await MedicamentoDao().insertMedicamento(med);
-  //   med = med.copyWith(id: newId);
-  //
-  //   int horasEntreToma = _horasEntreToma;
-  //   TimeOfDay? horaInicio = _horaInicio;
-  //   int duracion = _selectedDayRange.duration.inDays;
-  //   int mesActual = _selectedDayRange.start.month;
-  //   int diaActual = _selectedDayRange.start.day;
-  //   final vecesAlDia = 24 ~/ horasEntreToma; // Usa división entera para obtener la cantidad de veces al día
-  //   // TimeOfDay horaTomaActual = horaInicio!;
-  //
-  //   // Día de la duración del tratamiento
-  //   for (int dia = 0; dia < duracion; dia++) {
-  //     diaActual += dia;
-  //     // Si en algún momento de la duración del tratamiento supera los días del mes, salta al siguiente mes
-  //     if (diaActual > _daysInMonth(mesActual)) {
-  //       mesActual++;
-  //       diaActual = 1;
-  //     }
-  //
-  //     // Mantener el día actual constante para todas las tomas dentro del mismo día
-  //     int diaTomaActual = diaActual;
-  //
-  //     for (int toma = 0; toma < vecesAlDia; toma++) {
-  //       int horaCounter = horaInicio!.hour;
-  //       int minutoCounter = horaInicio.minute;
-  //
-  //       // Asegúrate de que las horas no excedan las 24 horas en un día
-  //       horaCounter += horasEntreToma * toma;
-  //       while (horaCounter >= 24) {
-  //         // Si excede las 24 horas, ajusta las horas y el día
-  //         horaCounter -= 24;
-  //         if (diaTomaActual > _daysInMonth(mesActual)) {
-  //           mesActual++;
-  //           diaTomaActual = 1;
-  //         }
-  //       }
-  //
-  //       // Crear recordatorio e insertarlo en la db
-  //       final newRecordatorio = Recordatorio(
-  //         id_medicamento: med.id,
-  //         hora: "${_selectedDayRange.start.year}-$mesActual-${diaTomaActual < 10 ? '0$diaTomaActual' : diaTomaActual} ${horaCounter < 10 ? '0$horaCounter' : horaCounter}:$minutoCounter",
-  //       );
-  //       _insertarRecordatorioEnDb(newRecordatorio);
-  //       debugPrint("----> Insertado recordatorio en db");
-  //
-  //       // Programar una alarma para ese recordatorio
-  //       _programarAlarma(mesActual, diaTomaActual, horaCounter, minutoCounter);
-  //     }
-  //   }
-  // }
-
-  /// GPT segundo intento
+  /// Insertar medicamento en la db, creando los recordatorios a las horas que corresponden e insertándolos en la db,
+  /// más crear alarmas y posponerlas hasta cada hora correspondiente
   _insertarEnDb(Medicamento med) async {
     final newId = await MedicamentoDao().insertMedicamento(med);
     med = med.copyWith(id: newId);
@@ -658,8 +525,9 @@ class _ScreenAddMedicamentoState extends State<ScreenAddMedicamento> {
     );
 
     // TODO: descomentar cuando quiera programar alarmas
-    // TODO: comprobar que la alarma que haya puesto no sea anterior a la fecha actual
-    // await Alarm.set(alarmSettings: alarmSettings);
+    // Comprobar que la alarma que haya puesto no sea anterior a la fecha actual
+    if (alarmSettings.dateTime.isAfter(DateTime.now())) {
+      // await Alarm.set(alarmSettings: alarmSettings);
+    }
   }
-
 }

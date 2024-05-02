@@ -14,7 +14,10 @@ class Medicamento{
   final String? foto;
 
   Medicamento({this.id = -1, required this.nombre,
-    this.dosis = "Sin dosis especificada", required this.frecuencia, required this.duracion, this.foto});
+      this.dosis = "Sin especificar",
+      required this.frecuencia,
+      required this.duracion,
+      this.foto});
 
   Medicamento copyWith({int? id, String? nombre, String? dosis, int? frecuencia, int? duracion, String? foto}){
     return Medicamento(id: id ?? this.id, nombre: nombre ?? this.nombre,
@@ -24,7 +27,7 @@ class Medicamento{
 
   factory Medicamento.fromMap(Map<String, dynamic> map){
     return Medicamento(id: map['id'], nombre: map['nombre'],
-        dosis: map['dosis'] ?? '',
+        dosis: map['dosis'] ?? 'Sin especificar',
         frecuencia: map['frecuencia'],
         duracion: map['duracion'],
         foto: map['foto'] ?? '');
@@ -38,7 +41,7 @@ class Medicamento{
     };
 
     if(id!=-1) map['id'] = id;
-    if (dosis.contains("especificada")) map['dosis'] = dosis;
+    if (!dosis.contains("especificar")) map['dosis'] = dosis;
     if (foto != null && foto!.isNotEmpty) map['foto'] = foto!;
 
     return map;

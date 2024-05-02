@@ -112,7 +112,7 @@ class _ScreenMedicamentosState extends State<ScreenMedicamentos> {
 
   _medTile(Medicamento med) {
     return ListTile(
-      leading: med.dosis.contains("mg")
+      leading: !med.dosis.contains("ml")
           ? Icon(
               Icons.medication,
               color: Colors.red[400],
@@ -133,7 +133,9 @@ class _ScreenMedicamentosState extends State<ScreenMedicamentos> {
           side: BorderSide(color: Colors.black54), //the outline color
           borderRadius: BorderRadius.all(Radius.circular(12))),
       onTap: () async{
-        final result = await Navigator.pushNamed(context, ROUTE_MEDICAMENTO_DETAILS, arguments: med);
+        final result = await Navigator.pushNamed(
+            context, ROUTE_MEDICAMENTO_DETAILS,
+            arguments: [med, _cargarMedicamentos]);
         if (result != null  &&  result as bool) _cargarMedicamentos();
       },
     );
@@ -141,19 +143,22 @@ class _ScreenMedicamentosState extends State<ScreenMedicamentos> {
 
   //////////////////////////////// BASE DE DATOS ////////////////////////////////////
 
-  /// TODO: que haya opciones de ordenar (por id, por nombre, por primero en acabar)
-  _cargarMedicamentos() async {
+  /// TODO: que haya opciones de ordenar (por id, por nombre, por primero en acabar) ¿?
+  _cargarMedicamentos() {
     // Lista ordenada por id
     // List<Medicamento> meds = await MedicamentoDao().readAllMedicamentos();
 
-    // lista ordenada alfabéticamente
-    final medsMap = await DbHelper.instance.db
-        .query(MedicamentoDao().tableName, orderBy: 'nombre ASC');
-    List<Medicamento> meds =
-        medsMap.map((e) => Medicamento.fromMap(e)).toList();
+    List<Medicamento> meds = [];
 
-    setState(() {
-      _listaMedicamentos = meds;
+    // lista ordenada alfabéticamente
+    DbHelper.instance.db
+        .query(MedicamentoDao().tableName, orderBy: 'nombre ASC')
+        .then((value) {
+      meds = value.map((e) => Medicamento.fromMap(e)).toList();
+
+      setState(() {
+        _listaMedicamentos = meds;
+      });
     });
   }
 }

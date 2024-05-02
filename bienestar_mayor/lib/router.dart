@@ -34,10 +34,13 @@ class Router{
         return MaterialPageRoute(
             builder: (_) => const ScreenAddMedicamento(), settings: settings);
       case ROUTE_MEDICAMENTO_DETAILS:
-        final med = settings.arguments as Medicamento;
+        final args = settings.arguments as List<dynamic>;
+        final med = args[0] as Medicamento;
+        final Function() function = args.length > 1 ? args[1] : () => "";
 
         return MaterialPageRoute(
-            builder: (_) => ScreenMedicamentoDetails(med), settings: settings);
+            builder: (_) => ScreenMedicamentoDetails(med, function),
+            settings: settings);
       case ROUTE_CALENDAR:
         return MaterialPageRoute(
             builder: (_) => const ScreenCalendar(), settings: settings);

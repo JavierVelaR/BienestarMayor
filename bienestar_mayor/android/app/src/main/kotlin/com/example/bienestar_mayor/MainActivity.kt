@@ -1,4 +1,4 @@
-package com.example.bienestar_mayor
+package com.javiervela.bienestar_mayor
 
 import io.flutter.embedding.android.FlutterActivity
 

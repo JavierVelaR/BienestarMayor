@@ -33,22 +33,13 @@ class _PanelEventosState extends State<PanelEventos> {
                   )
                 ]),
               )
-            : Column(
-                children: [
-                  const Text(
-                    "Eventos:",
-                    style: TextStyle(fontSize: 22),
-                  ),
-                  _listEventTiles(),
-                ],
-              ));
+            : _listEventTiles());
   }
 
-  /// TODO: Sobresalen los eventos
   _listEventTiles() {
     final events = widget._events;
     return SizedBox(
-      height: MediaQuery.of(context).size.height / 4.3,
+      height: MediaQuery.of(context).size.height / 2.8,
       child: ListView.separated(
         padding: const EdgeInsets.all(10),
         separatorBuilder: (_, __) => const SizedBox(
