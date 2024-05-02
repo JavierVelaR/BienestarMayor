@@ -57,7 +57,7 @@ class _ScreenCalendarState extends State<ScreenCalendar> {
           children: [
             _calendar(),
             // TODO: Se tienen que ver 2 eventos, y el tercero aparecer deslizando, aparece el 3º en blanco
-            PanelEventos(_listaEventosDia),
+            PanelEventos(_listaEventosDia, _borrarEvento),
           ],
         ),
       ),
@@ -219,9 +219,6 @@ class _ScreenCalendarState extends State<ScreenCalendar> {
                       // Insertar evento a la db
                       _guardarEvento(event);
 
-                      // Actualizar eventos del dia seleccionado
-                      _cargarEventosDia();
-
                       // TODO: programar notificación para que salga el dia anterior y/o el mismo dia
                       if (DateTime(anio, int.parse(mes), int.parse(dia))
                           .isAfter(DateTime.now())) {
@@ -242,12 +239,22 @@ class _ScreenCalendarState extends State<ScreenCalendar> {
   }
 
   /// Insertar evento en la db
-  _guardarEvento(Evento event) async{
-    await EventoDao().insertEvento(event);
+  _guardarEvento(Evento event) {
+    EventoDao().insertEvento(event).then((value) {
+      // Actualizar eventos del dia seleccionado
+      _cargarEventosDia();
+    });
   }
 
-  /// TODO: cuando haya eventos, que los dias en los que hay eventos tengan alguna marca de ello,
-  /// Añadir a la tabla evento el campo categoria TEXT
+  _borrarEvento(Evento event) {
+    EventoDao().deleteEvento(event).then((value) {
+      // Actualizar eventos del dia seleccionado
+      _cargarEventos();
+      _cargarEventosDia();
+    });
+  }
+
+  /// TODO: Añadir a la tabla evento el campo categoria TEXT
   /// a ser posible con color especifico de la categoria (cita médica, tratamiento, ocio, personal)
   _calendar() {
     return TableCalendar(
@@ -317,13 +324,15 @@ class _ScreenCalendarState extends State<ScreenCalendar> {
         ),
 
         // Marcadores de eventos (como max 3, al clickar, abajo se verán todos)
-          markerSize: 9,
-          markersMaxCount: 3,
-          markerMargin: EdgeInsets.symmetric(horizontal: 0.8),
-          markerDecoration: BoxDecoration(
-              // TODO: color de la categoría
-              color: Colors.red,
-              borderRadius: BorderRadius.all(Radius.circular(100)))),
+        markerSize: 9,
+        markersMaxCount: 3,
+        markerMargin: EdgeInsets.symmetric(horizontal: 0.8),
+        // markerDecoration: BoxDecoration(
+        //   // TODO: color de la categoría
+        //     color: Colors.black,
+        //
+        //     borderRadius: BorderRadius.all(Radius.circular(100)))
+      ),
 
       onFormatChanged: (CalendarFormat format) {
         setState(() {
@@ -366,8 +375,6 @@ class _ScreenCalendarState extends State<ScreenCalendar> {
         // Si la fecha no existe en el mapa, creamos una nueva lista con el evento
         _selectedEvents[fechaEvento] = [event];
       }
-      debugPrint("______________________________> ${event.fecha}");
-      debugPrint("-------------> ${fechaEvento.year}-${fechaEvento.month}-${fechaEvento.day}");
     }
 
     // Actualizar el estado para que los cambios se reflejen en la interfaz
