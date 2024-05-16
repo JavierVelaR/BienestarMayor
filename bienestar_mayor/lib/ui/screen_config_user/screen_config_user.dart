@@ -22,6 +22,7 @@ class _ScreenConfigUserState extends State<ScreenConfigUser> {
   String _textError = "";
 
   List<bool> selectedOption = <bool>[true,false];
+  bool _selected = false;
 
   @override
   void initState() {
@@ -39,6 +40,14 @@ class _ScreenConfigUserState extends State<ScreenConfigUser> {
           const SizedBox(height: 30,),
           const Text("Repetir alarmas si no se apaga:", style: TextStyle(fontSize: 20),),
           _repetirAlarmas(),
+          Switch.adaptive(
+              value: _selected,
+              onChanged: (selected) {
+                setState(() {
+                  _selected = selected;
+                });
+              }),
+
           ///TODO: numeros de familiares para llamar al pulsar emergencia
         ],
       ),
@@ -247,8 +256,8 @@ class _ScreenConfigUserState extends State<ScreenConfigUser> {
     _email = prefs.getString(ManagerUser.PREFS_USER_EMAIL);
 
     setState(() {
-      _usernameController.text = _username!;
-      _emailController.text = _email!;
+      if (_username != null) _usernameController.text = _username!;
+      if (_email != null) _emailController.text = _email!;
     });
 
   }

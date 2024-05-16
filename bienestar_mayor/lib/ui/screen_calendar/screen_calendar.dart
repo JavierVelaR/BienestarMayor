@@ -1,5 +1,7 @@
 import 'package:bienestar_mayor/database/dao/evento_dao.dart';
 import 'package:bienestar_mayor/database/db_helper.dart';
+import 'package:bienestar_mayor/model/evento.dart';
+import 'package:bienestar_mayor/notifications/local_notification.dart';
 import 'package:bienestar_mayor/theme/custom_colors.dart';
 import 'package:bienestar_mayor/ui/screen_calendar/panel_eventos.dart';
 import 'package:bienestar_mayor/utils/string_utils.dart';
@@ -7,7 +9,6 @@ import 'package:bienestar_mayor/widgets/drawer_custom.dart';
 import 'package:flutter/material.dart';
 import 'package:table_calendar/table_calendar.dart';
 
-import '../../model/evento.dart';
 
 class ScreenCalendar extends StatefulWidget {
   const ScreenCalendar({super.key});
@@ -98,6 +99,8 @@ class _ScreenCalendarState extends State<ScreenCalendar> {
     final mesController = TextEditingController();
     mesController.text = _selectedDay.month.toString();
 
+    // LocalNotification.displayNotification();
+
     final result = await showDialog(
         context: context,
         builder: (_) => AlertDialog(
@@ -130,11 +133,22 @@ class _ScreenCalendarState extends State<ScreenCalendar> {
                     const SizedBox(
                       height: 20,
                     ),
-                    const Text("Descripción",
-                        style: TextStyle(
-                            fontSize: 22,
-                            fontWeight: FontWeight.w500,
-                            color: CustomColors.zafiro)),
+                    const Row(
+                      children: [
+                        Text("Descripción",
+                            style: TextStyle(
+                                fontSize: 22,
+                                fontWeight: FontWeight.w500,
+                                color: CustomColors.zafiro)),
+                        SizedBox(
+                          width: 10,
+                        ),
+                        Text(
+                          "* Opcional",
+                          style: TextStyle(fontSize: 16, color: Colors.red),
+                        )
+                      ],
+                    ),
                     SizedBox(
                       width: 300,
                       child: TextFormField(
@@ -200,7 +214,6 @@ class _ScreenCalendarState extends State<ScreenCalendar> {
                 ElevatedButton(
                   onPressed: () {
                     if (tituloController.text.isNotEmpty &&
-                        descripcionController.text.isNotEmpty &&
                         diaController.text.isNotEmpty &&
                         StringUtils.esNumero(diaController.text) &&
                         mesController.text.isNotEmpty &&
@@ -216,13 +229,8 @@ class _ScreenCalendarState extends State<ScreenCalendar> {
                               "$anio-${int.parse(mes) < 10 ? '0$mes' : mes}-${int.parse(dia) < 10 ? '0$dia' : dia}");
 
                       // Insertar evento a la db
-                      _guardarEvento(event);
-
-                      // TODO: programar notificación para que salga el dia anterior y/o el mismo dia
-                      if (DateTime(anio, int.parse(mes), int.parse(dia))
-                          .isAfter(DateTime.now())) {
-                        // Programar notificación
-                      }
+                      _saveEventAndScheduleNotification(
+                          event, anio, int.parse(mes), int.parse(dia), true);
 
                       Navigator.pop(context, true);
                     }
@@ -237,12 +245,34 @@ class _ScreenCalendarState extends State<ScreenCalendar> {
     if (result != null && result as bool && mounted) _cargarEventos();
   }
 
-  /// Insertar evento en la db
-  _guardarEvento(Evento event) {
-    EventoDao().insertEvento(event).then((value) {
+  _saveEventAndScheduleNotification(
+      Evento event, int year, int month, int day, bool esEvento) {
+    _insertEvento(event).then((newId) {
+      // TODO: programar notificación para que salga el dia anterior y/o el mismo dia
+      if (DateTime(year, month, day).isAfter(DateTime.now())) {
+        // Programar notificación
+        // TODO: manejar que si es inicio de mes, se ponga el ultimo dia del mes anterior, y si es el 01/01, que se ponga el 31/12
+        // LocalNotification.scheduleNotification(newId, year, month, day-1, 0, 0, esEvento: esEvento);
+        LocalNotification.scheduleNotification(
+            newId,
+            DateTime.now().year,
+            DateTime.now().month,
+            DateTime.now().day,
+            DateTime.now().hour,
+            DateTime.now().minute,
+            esEvento: esEvento);
+      }
+
       // Actualizar eventos del dia seleccionado
       _cargarEventosDia();
     });
+  }
+
+  /// Insertar evento en la db
+  Future<int> _insertEvento(Evento event) async {
+    final newId = await EventoDao().insertEvento(event);
+
+    return newId;
   }
 
   _borrarEvento(Evento event) {
@@ -357,7 +387,7 @@ class _ScreenCalendarState extends State<ScreenCalendar> {
 
   //////////////////////////////// CARGAR DE DB //////////////////////////////
   _cargarEventos() async {
-    final eventsMap = await DbHelper.instance.db.query(EventoDao().tableName);
+    final eventsMap = await DbHelper().db.query(EventoDao().tableName);
     List<Evento> events = eventsMap.map((e) => Evento.fromMap(e)).toList();
 
     // Reiniciar el mapa de eventos seleccionados
@@ -386,7 +416,7 @@ class _ScreenCalendarState extends State<ScreenCalendar> {
     final mes = fecha.month;
     final dia = fecha.day;
 
-    final eventsMap = await DbHelper.instance.db.query(EventoDao().tableName,
+    final eventsMap = await DbHelper().db.query(EventoDao().tableName,
         where: "fecha = ?", whereArgs: ["$anio-${mes < 10 ? '0$mes' : mes}-${dia < 10 ? '0$dia' : dia}"], orderBy: 'titulo ASC');
     List<Evento> events = eventsMap.map((e) => Evento.fromMap(e)).toList();
     debugPrint("CARGADOS EVENTOS DEL DIA: $dia de $mes");

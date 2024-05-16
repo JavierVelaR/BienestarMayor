@@ -4,7 +4,8 @@ import 'package:bienestar_mayor/widgets/drawer_custom.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:url_launcher/url_launcher_string.dart';
-import '../../generated/assets.dart';
+
+import '../generated/assets.dart';
 
 class ScreenPrincipal extends StatefulWidget {
   const ScreenPrincipal({super.key});

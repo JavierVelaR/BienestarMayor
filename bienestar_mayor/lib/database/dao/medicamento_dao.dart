@@ -4,7 +4,7 @@ import 'package:sqflite/sqflite.dart';
 import '../db_helper.dart';
 
 class MedicamentoDao{
-  final database = DbHelper.instance.db;
+  final database = DbHelper().db;
   final tableName = 'medicamentos';
 
   Future<List<Medicamento>> readAllMedicamentos() async{

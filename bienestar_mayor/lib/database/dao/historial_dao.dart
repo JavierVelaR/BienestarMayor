@@ -4,7 +4,7 @@ import 'package:sqflite/sqflite.dart';
 import '../db_helper.dart';
 
 class HistorialDao{
-  final database = DbHelper.instance.db;
+  final database = DbHelper().db;
   final tableName = 'historial';
 
   Future<List<Historial>> readAllHistoriales() async{

@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:alarm/alarm.dart';
 import 'package:bienestar_mayor/database/dao/medicamento_dao.dart';
 import 'package:bienestar_mayor/database/dao/recordatorio_dao.dart';
 import 'package:bienestar_mayor/database/db_helper.dart';
@@ -35,6 +36,7 @@ class _ScreenMedicamentoDetailsState extends State<ScreenMedicamentoDetails> {
     if (_fotoPath.isNotEmpty) _tieneFoto = true;
   }
 
+  // TODO: Mejorar recuadro de foto, ver si está vertical o en paisaje, que muestre las horas de toma
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -145,6 +147,8 @@ class _ScreenMedicamentoDetailsState extends State<ScreenMedicamentoDetails> {
     );
   }
 
+  // todo: modificar horas de toma de medicamento ¿? no creo
+
   _floatingActionButton() => SizedBox(
         height: 80,
         width: 80,
@@ -178,7 +182,7 @@ class _ScreenMedicamentoDetailsState extends State<ScreenMedicamentoDetails> {
                             TextButton(
                                 onPressed: () async{
                                   // Eliminar medicamento y recordatorios de la db
-                                  final query = await DbHelper.instance.db.query(
+                                  final query = await DbHelper().db.query(
                                       RecordatorioDao().tableName, where: "id_medicamento = ?", whereArgs: [widget._medicamento.id]);
 
                                   final listaRecordatorios = query.map((e) => Recordatorio.fromMap(e)).toList();
@@ -186,11 +190,12 @@ class _ScreenMedicamentoDetailsState extends State<ScreenMedicamentoDetails> {
                                   for(Recordatorio rec in listaRecordatorios){
                                     RecordatorioDao().deleteRecordatorio(rec);
                                     // debugPrint("Recordatorio eliminado: id -> ${rec.id}");
+
+                                    // Eliminar las alarmas programadas de ese medicamento
+                                    Alarm.stop(rec.id);
                                   }
 
                                   MedicamentoDao().deleteMedicamento(widget._medicamento);
-
-                                  // TODO: IMPORTANTE FUTURO, eliminar las alarmas programadas
 
                                   // /// TODO: mostrar texto que se ha eliminado con exito ¿?
                                   // showDialog(

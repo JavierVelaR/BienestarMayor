@@ -4,7 +4,7 @@ import 'package:sqflite/sqflite.dart';
 import '../db_helper.dart';
 
 class EventoDao{
-  final database = DbHelper.instance.db;
+  final database = DbHelper().db;
   final tableName = 'eventos';
 
   Future<List<Evento>> readAlEventos() async{

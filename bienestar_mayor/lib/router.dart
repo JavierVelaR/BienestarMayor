@@ -1,10 +1,12 @@
+import 'package:alarm/model/alarm_settings.dart';
 import 'package:bienestar_mayor/model/medicamento.dart';
+import 'package:bienestar_mayor/ui/screen_alarm_ringing.dart';
 import 'package:bienestar_mayor/ui/screen_calendar/screen_calendar.dart';
 import 'package:bienestar_mayor/ui/screen_config_user/screen_config_user.dart';
 import 'package:bienestar_mayor/ui/screen_medicamentos/screen_add_medicamento.dart';
 import 'package:bienestar_mayor/ui/screen_medicamentos/screen_medicamento_details.dart';
 import 'package:bienestar_mayor/ui/screen_medicamentos/screen_medicamentos.dart';
-import 'package:bienestar_mayor/ui/screen_principal/screen_principal.dart';
+import 'package:bienestar_mayor/ui/screen_principal.dart';
 import 'package:bienestar_mayor/ui/screen_seguimiento/screen_seguimiento.dart';
 import 'package:flutter/material.dart';
 
@@ -17,6 +19,7 @@ const ROUTE_MEDICAMENTO_DETAILS = '/medicamentos_details';
 const ROUTE_CALENDAR = '/calendar';
 const ROUTE_SEGUIMIENTO = '/seguimiento';
 const ROUTE_EMERGENCY = '/emergency';
+const ROUTE_ALARM_RINGING = '/alarmRinging';
 
 class Router{
   static Route<dynamic>? generateRoute(RouteSettings settings){
@@ -47,10 +50,16 @@ class Router{
       case ROUTE_SEGUIMIENTO:
         return MaterialPageRoute(
             builder: (_) => const ScreenSeguimiento(), settings: settings);
-      case ROUTE_EMERGENCY:
+      // case ROUTE_EMERGENCY:
+      //   return MaterialPageRoute(
+      //     ///Cambiar a ScreenEmergency
+      //       builder: (_) => const ScreenCalendar(), settings: settings);
+      case ROUTE_ALARM_RINGING:
+        final args = settings.arguments as List<AlarmSettings>;
         return MaterialPageRoute(
-          ///Cambiar a ScreenEmergency
-            builder: (_) => const ScreenCalendar(), settings: settings);
+          builder: (_) => ScreenAlarmRinging(args),
+          settings: settings,
+        );
     }
     return null;
   }

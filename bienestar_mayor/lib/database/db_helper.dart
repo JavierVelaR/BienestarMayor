@@ -3,11 +3,13 @@ import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
 
 class DbHelper{
-  static DbHelper? _dbHelper;
+  static final DbHelper _dbHelper = DbHelper._internal();
+
+  factory DbHelper() {
+    return _dbHelper;
+  }
 
   DbHelper._internal();
-
-  static DbHelper get instance => _dbHelper ??= DbHelper._internal();
 
   Database? _db;
 

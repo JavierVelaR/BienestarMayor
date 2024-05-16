@@ -8,7 +8,8 @@ class Evento{
   //TODO: añadir categoria TEXT, para decoracion del calendario
 
   Evento({this.id = -1, required this.titulo,
-    required this.descripcion, required this.fecha});
+      this.descripcion = "",
+      required this.fecha});
 
   Evento copyWith({int? id, String? titulo, String? descripcion, String? fecha}){
     return Evento(id: id ?? this.id, titulo: titulo ?? this.titulo,
@@ -27,7 +28,8 @@ class Evento{
       'fecha': fecha,
     };
 
-    if(id!=-1) map['id'] = id;
+    if (id != -1) map['id'] = id;
+    if (descripcion.isNotEmpty) map['descripcion'] = descripcion;
 
     return map;
   }

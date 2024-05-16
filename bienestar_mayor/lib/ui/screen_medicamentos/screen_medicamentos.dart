@@ -1,3 +1,4 @@
+import 'package:alarm/alarm.dart';
 import 'package:bienestar_mayor/database/dao/medicamento_dao.dart';
 import 'package:bienestar_mayor/database/db_helper.dart';
 import 'package:bienestar_mayor/router.dart';
@@ -22,6 +23,10 @@ class _ScreenMedicamentosState extends State<ScreenMedicamentos> {
   @override
   void initState() {
     super.initState();
+    final alarmas = Alarm.getAlarms();
+    for (int i = 0; i < alarmas.length; i++) {
+      debugPrint("${alarmas[i].id}, ${alarmas[i].dateTime}");
+    }
     _cargarMedicamentos();
   }
 
@@ -35,18 +40,15 @@ class _ScreenMedicamentosState extends State<ScreenMedicamentos> {
       body: Padding(
           padding: const EdgeInsets.all(25),
           child: _listaMedicamentos.isEmpty
-              ? Column(mainAxisAlignment: MainAxisAlignment.center, children: [
-                  SizedBox(
-                    height: MediaQuery.of(context).size.height / 3.5,
-                  ),
-                  const Text(
+              ? const Center(
+                  child: Text(
                     "Añade medicamentos para que se muestren aquí",
                     style: TextStyle(
                         fontSize: 28,
                         fontStyle: FontStyle.italic,
                         color: Colors.grey),
                   ),
-                ])
+                )
               : _listMedTiles()),
     );
   }
@@ -151,7 +153,8 @@ class _ScreenMedicamentosState extends State<ScreenMedicamentos> {
     List<Medicamento> meds = [];
 
     // lista ordenada alfabéticamente
-    DbHelper.instance.db
+    DbHelper()
+        .db
         .query(MedicamentoDao().tableName, orderBy: 'nombre ASC')
         .then((value) {
       meds = value.map((e) => Medicamento.fromMap(e)).toList();

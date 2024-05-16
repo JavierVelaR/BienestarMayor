@@ -1,11 +1,9 @@
 
-import 'package:flutter/material.dart';
 // import 'package:prueba_login/api/responses/response_login.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 // import 'package:jwt_decoder/jwt_decoder.dart';
 
-
-/// TODO: enlazar esta clase a base de datos
+/// enlazar esta clase a base de datos ¿?
 class ManagerUser {
   // Singleton ///////////////////////////////////////////////////////////////////////////////////////////////
   static final ManagerUser _instance = ManagerUser._internal();

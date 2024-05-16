@@ -1,12 +1,14 @@
+import 'package:alarm/alarm.dart';
 import 'package:alarm/model/alarm_settings.dart';
 import 'package:bienestar_mayor/database/dao/medicamento_dao.dart';
 import 'package:bienestar_mayor/database/dao/recordatorio_dao.dart';
+import 'package:bienestar_mayor/generated/assets.dart';
 import 'package:bienestar_mayor/model/medicamento.dart';
 import 'package:bienestar_mayor/model/recordatorio.dart';
+import 'package:bienestar_mayor/theme/custom_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 
-import '../../theme/custom_colors.dart';
 
 class ScreenAddMedicamento extends StatefulWidget {
   const ScreenAddMedicamento({super.key});
@@ -25,6 +27,8 @@ class _ScreenAddMedicamentoState extends State<ScreenAddMedicamento> {
   XFile? _pickedFile;
   String _pickedFilePath = "";
   bool _fotoCogida = false;
+
+  // TODO: mejorar la interfaz, dosificando los inputs a varias pantallas, o paneles
 
   @override
   Widget build(BuildContext context) {
@@ -255,7 +259,7 @@ class _ScreenAddMedicamentoState extends State<ScreenAddMedicamento> {
                 context: context,
                 firstDate: DateTime.now(),
                 lastDate: DateTime.now().add(const Duration(days: 30)),
-
+                locale: const Locale('es', 'ES'),
               );
               setState(() {
                 if(selectedRange!=null) _selectedDayRange = selectedRange;
@@ -269,7 +273,6 @@ class _ScreenAddMedicamentoState extends State<ScreenAddMedicamento> {
   }
 
   _addPhoto(){
-
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
       children: [
@@ -305,7 +308,6 @@ class _ScreenAddMedicamentoState extends State<ScreenAddMedicamento> {
                             _pickedFile = await ImagePicker().pickImage(source: ImageSource.gallery);
                             if(_pickedFile != null && _pickedFile!.path.isNotEmpty){
                             _pickedFilePath = _pickedFile!.path;
-                            final file = XFile(_pickedFilePath);
                             setState(() {
                               _fotoCogida = true;
                             });
@@ -317,7 +319,6 @@ class _ScreenAddMedicamentoState extends State<ScreenAddMedicamento> {
                     ],
                   ),
               );
-
             },
             child: _fotoCogida
                 ? const Icon(
@@ -479,11 +480,9 @@ class _ScreenAddMedicamentoState extends State<ScreenAddMedicamento> {
             "${hora < 10 ? '0$hora' : hora}:"
             "${minutos < 10 ? '0$minutos' : minutos}",
       );
-      _insertarRecordatorioEnDb(newRecordatorio);
+      _insertarRecordatorioEnDbYprogramarAlarma(
+          newRecordatorio, med, mes, dia, hora, minutos);
       debugPrint("----> Insertado recordatorio en db");
-
-      // Programar una alarma para ese recordatorio
-      _programarAlarma(mes, dia, hora, minutos);
 
       // Calcular la próxima hora de recordatorio
       hora += _horasEntreToma;
@@ -509,25 +508,34 @@ class _ScreenAddMedicamentoState extends State<ScreenAddMedicamento> {
     programarRecordatorios(duracion, horaInicio!.hour, horaInicio.minute, diaActual, mesActual);
   }
 
-  _insertarRecordatorioEnDb(Recordatorio rec) async {
+  _insertarRecordatorioEnDbYprogramarAlarma(Recordatorio rec, Medicamento med,
+      int mes, int dia, int hora, int minuto) async {
     final newId = await RecordatorioDao().insertRecordatorio(rec);
     rec = rec.copyWith(id: newId);
+
+    _programarAlarma(newId, med, mes, dia, hora, minuto);
   }
 
-  _programarAlarma(int mes, int dia, int hora, int minuto) async{
+  _programarAlarma(int idRecordatorio, Medicamento med, int mes, int dia,
+      int hora, int minuto) async {
     final alarmSettings = AlarmSettings(
-      id: 1,
-      dateTime: DateTime(2024, mes, dia, hora, minuto),
-      assetAudioPath: '../media/alarmaLluvia.mp3',
-      notificationTitle: 'Alarma de prueba',
-      notificationBody: 'Esta alarma es de prueba',
-      fadeDuration: 3.0,
-    );
+        id: idRecordatorio,
+        dateTime: DateTime(2024, mes, dia, hora, minuto),
+        assetAudioPath: Assets.audioOversimplified,
+        notificationTitle: 'Toma de ${med.nombre}',
+        notificationBody: 'Tomar ${med.dosis} de ${med.nombre}',
+        fadeDuration: 3.0,
+        loopAudio: true,
+        vibrate: true,
+        volume: 1,
+        androidFullScreenIntent: true,
+        enableNotificationOnKill: true);
 
-    // TODO: descomentar cuando quiera programar alarmas
     // Comprobar que la alarma que haya puesto no sea anterior a la fecha actual
     if (alarmSettings.dateTime.isAfter(DateTime.now())) {
-      // await Alarm.set(alarmSettings: alarmSettings);
+      await Alarm.set(alarmSettings: alarmSettings);
+      debugPrint(
+          "Alarma programada: ${alarmSettings.notificationTitle}, ${alarmSettings.dateTime}");
     }
   }
 }

@@ -4,7 +4,7 @@ import 'package:sqflite/sqflite.dart';
 import '../db_helper.dart';
 
 class RecordatorioDao{
-  final database = DbHelper.instance.db;
+  final database = DbHelper().db;
   final tableName = 'recordatorios';
 
   Future<List<Recordatorio>> readAllRecordatorios() async{
