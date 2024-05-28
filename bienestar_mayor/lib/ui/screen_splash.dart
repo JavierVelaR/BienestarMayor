@@ -7,6 +7,8 @@ import '../generated/assets.dart';
 import '../router.dart';
 
 class ScreenSplash extends StatefulWidget {
+  // final bool isAlarmRinging;
+  // final List<AlarmSettings>? alarmsRinging;
   const ScreenSplash({super.key});
 
   @override
@@ -15,38 +17,43 @@ class ScreenSplash extends StatefulWidget {
 
 class _ScreenSplashState extends State<ScreenSplash> {
   static const DURATION_SPLASH = Duration(seconds: 2);
-  List<AlarmSettings> _alarmsRinging = [];
-
-  // final List<AlarmSettings> _alarmsRinging = [
-  //   AlarmSettings(
-  //     id: 1,
-  //     dateTime: DateTime(2024, 1, 12, 10, 45),
-  //     assetAudioPath: Assets.audioOversimplified,
-  //     notificationTitle: 'Toma de ibuprofeno',
-  //     notificationBody: 'Tomar 500mg de ibuprofeno',
-  //     fadeDuration: 3.0,
-  //     loopAudio: true,
-  //     vibrate: true,
-  //     volume: 1,
-  //     androidFullScreenIntent: true,
-  //     enableNotificationOnKill: true
-  //   ),
-  // ];
 
   @override
   void initState() {
     super.initState();
 
-    _cancelAlarmsRinging();
-
     Future.delayed(DURATION_SPLASH).then((value) async{
-      _alarmsRinging.isNotEmpty
+      final listAlarmsStopped = await _cancelAlarmsRinging();
+
+      listAlarmsStopped.isNotEmpty
           ? Navigator.pushNamedAndRemoveUntil(
               context, ROUTE_ALARM_RINGING, (route) => false,
-              arguments: _alarmsRinging)
+              arguments: listAlarmsStopped)
           : Navigator.pushNamedAndRemoveUntil(
               context, ROUTE_PRINCIPAL, (route) => false);
     });
+  }
+
+  /// Cancelar las alarmas que están sonando actualmente
+  Future<List<AlarmSettings>> _cancelAlarmsRinging() async {
+    List<AlarmSettings> alarmsStopped = [];
+
+    final allAlarms = Alarm.getAlarms();
+
+    for (AlarmSettings alarm in allAlarms) {
+      bool isAlarmActive = await Alarm.isRinging(alarm.id);
+      if (isAlarmActive) {
+        alarmsStopped.add(alarm);
+        await Alarm.stop(alarm.id);
+
+        debugPrint(
+            'Cancelled alarm ${alarm.notificationTitle} that was currently active.');
+      }
+    }
+
+    Alarm.checkAlarm();
+
+    return alarmsStopped;
   }
 
   @override
@@ -65,23 +72,5 @@ class _ScreenSplashState extends State<ScreenSplash> {
         )
       ),
     );
-  }
-
-  /// Cancelar las alarmas que están sonando actualmente
-  _cancelAlarmsRinging() async {
-    final allAlarms = Alarm.getAlarms();
-
-    for (AlarmSettings alarm in allAlarms) {
-      bool isAlarmActive = await Alarm.isRinging(alarm.id);
-      if (isAlarmActive) {
-        setState(() {
-          _alarmsRinging.add(alarm);
-        });
-        await Alarm.stop(alarm.id);
-
-        debugPrint(
-            'Cancelled alarm ${alarm.notificationTitle} that was currently active.');
-      }
-    }
   }
 }

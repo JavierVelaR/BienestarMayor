@@ -1,11 +1,11 @@
 class Historial{
   final int id;
   final int id_recordatorio;
-  final bool tomado;
+  final int tomado;
 
-  Historial({this.id = -1, required this.id_recordatorio, this.tomado = false});
+  Historial({this.id = -1, required this.id_recordatorio, this.tomado = 0});
 
-  Historial copyWith({int? id, int? id_recordatorio, bool? tomado}){
+  Historial copyWith({int? id, int? id_recordatorio, int? tomado = 0}) {
     return Historial(id: id ?? this.id,id_recordatorio: id_recordatorio ?? this.id_recordatorio,
         tomado: tomado ?? this.tomado);
   }

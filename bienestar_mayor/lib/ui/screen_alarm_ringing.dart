@@ -1,3 +1,4 @@
+import 'package:alarm/alarm.dart';
 import 'package:alarm/model/alarm_settings.dart';
 import 'package:bienestar_mayor/database/dao/historial_dao.dart';
 import 'package:bienestar_mayor/database/db_helper.dart';
@@ -47,9 +48,17 @@ class _ScreenAlarmRingingState extends State<ScreenAlarmRinging> {
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
               ElevatedButton(
-                  onPressed: () {
+                  onPressed: () async {
+                    _tomado = true;
+
+                    // Si la alarma que ha sonado, ya habia sonado antes, se actualiza, sino, se inserta
+                    // todo: hacer pruebas
                     for (var alarm in widget.alarms) {
-                      _insertHistorial(alarm.id);
+                      if (await _historialExists(alarm.id)) {
+                        _updateHistorial(alarm.id);
+                      } else {
+                        _insertHistorial(alarm.id);
+                      }
                     }
 
                     Navigator.pushNamedAndRemoveUntil(
@@ -62,8 +71,37 @@ class _ScreenAlarmRingingState extends State<ScreenAlarmRinging> {
                       ))),
               ElevatedButton(
                   onPressed: () {
+                    _tomado = false;
+
+                    for (var alarm in widget.alarms) {
+                      _insertHistorial(alarm.id);
+                    }
+
                     // todo: postponer alarma, que salga un dialog pidiendo un numero, y si el dialog
                     // devuelve true, navigator.pop, sino, solo se cierra
+
+                    for (var alarm in widget.alarms) {
+                      Alarm.set(
+                          alarmSettings: AlarmSettings(
+                              id: alarm.id,
+
+                              // dateTime: alarm.dateTime.add(const Duration(minutes: 2),
+
+                              // para pruebas
+                              dateTime: alarm.dateTime
+                                  .add(const Duration(seconds: 15)),
+                              assetAudioPath: alarm.assetAudioPath,
+                              notificationTitle: alarm.notificationTitle,
+                              notificationBody: alarm.notificationBody,
+                              volume: alarm.volume,
+                              vibrate: alarm.vibrate,
+                              loopAudio: alarm.loopAudio,
+                              fadeDuration: alarm.fadeDuration,
+                              androidFullScreenIntent:
+                                  alarm.androidFullScreenIntent,
+                              enableNotificationOnKill:
+                                  alarm.enableNotificationOnKill));
+                    }
 
                     Navigator.pushNamedAndRemoveUntil(
                         context, ROUTE_PRINCIPAL, (route) => false);
@@ -98,10 +136,10 @@ class _ScreenAlarmRingingState extends State<ScreenAlarmRinging> {
           final alarm = widget.alarms[index];
           return Column(
             children: [
-              Text("${alarm.notificationTitle}",
+              Text(alarm.notificationTitle,
                   style: const TextStyle(fontSize: 26)),
               Text(
-                "${alarm.notificationBody}",
+                alarm.notificationBody,
                 style: const TextStyle(fontSize: 24),
               ),
             ],
@@ -121,12 +159,48 @@ class _ScreenAlarmRingingState extends State<ScreenAlarmRinging> {
 
     final idRecordatorioMap = idRecordatorioMapList.map((historialMap) {
       return {
-        "id_recordatorio": historialMap['id_recordatorio'],
+        "id_recordatorio": historialMap['id'],
       };
     }).toList();
 
     HistorialDao().insertHistorial(Historial(
         id_recordatorio: idRecordatorioMap[0]["id_recordatorio"],
-        tomado: _tomado));
+        tomado: _tomado ? 1 : 0));
+  }
+
+  _updateHistorial(int idRecordatorio) async {
+    final db = DbHelper().db;
+    final query = await db.query(HistorialDao().tableName,
+        where: 'id_recordatorio = ?', whereArgs: [idRecordatorio]);
+    final historialList =
+        query.map((historialMap) => Historial.fromMap(historialMap)).toList();
+
+    for (final historial in historialList) {
+      HistorialDao().updateHistorial(Historial(
+          id: historial.id,
+          id_recordatorio: idRecordatorio,
+          tomado: _tomado ? 1 : 0));
+    }
+  }
+
+  Future<bool> _historialExists(int idHistorial) async {
+    final db = DbHelper().db;
+
+    final query = await db.query(HistorialDao().tableName,
+        where: 'id_recordatorio = ?', whereArgs: [idHistorial]);
+    final historialList =
+        query.map((historialMap) => Historial.fromMap(historialMap)).toList();
+
+    // db.query(HistorialDao().tableName, where: 'id = ?', whereArgs: [idHistorial]).then((query){
+    //   final historialList = query.map((historialMap) => Historial.fromMap(historialMap)).toList();
+    //   if(historialList.isNotEmpty) return true;
+    //       else return false;
+    // });
+
+    if (historialList.isNotEmpty) {
+      return true;
+    } else {
+      return false;
+    }
   }
 }

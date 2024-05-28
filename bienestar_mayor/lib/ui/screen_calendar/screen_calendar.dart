@@ -1,7 +1,9 @@
+import 'package:alarm/alarm.dart';
+import 'package:alarm/model/alarm_settings.dart';
 import 'package:bienestar_mayor/database/dao/evento_dao.dart';
 import 'package:bienestar_mayor/database/db_helper.dart';
+import 'package:bienestar_mayor/generated/assets.dart';
 import 'package:bienestar_mayor/model/evento.dart';
-import 'package:bienestar_mayor/notifications/local_notification.dart';
 import 'package:bienestar_mayor/theme/custom_colors.dart';
 import 'package:bienestar_mayor/ui/screen_calendar/panel_eventos.dart';
 import 'package:bienestar_mayor/utils/string_utils.dart';
@@ -248,19 +250,57 @@ class _ScreenCalendarState extends State<ScreenCalendar> {
   _saveEventAndScheduleNotification(
       Evento event, int year, int month, int day, bool esEvento) {
     _insertEvento(event).then((newId) {
-      // TODO: programar notificación para que salga el dia anterior y/o el mismo dia
-      if (DateTime(year, month, day).isAfter(DateTime.now())) {
+      if (DateTime(year, month, day - 1).isAfter(DateTime(
+          DateTime.now().year,
+          DateTime.now().month,
+          DateTime.now().day - 1,
+          DateTime.now().minute,
+          DateTime.now().second))) {
         // Programar notificación
         // TODO: manejar que si es inicio de mes, se ponga el ultimo dia del mes anterior, y si es el 01/01, que se ponga el 31/12
+
         // LocalNotification.scheduleNotification(newId, year, month, day-1, 0, 0, esEvento: esEvento);
-        LocalNotification.scheduleNotification(
-            newId,
-            DateTime.now().year,
-            DateTime.now().month,
-            DateTime.now().day,
-            DateTime.now().hour,
-            DateTime.now().minute,
-            esEvento: esEvento);
+
+        // LocalNotification.scheduleNotification(
+        //     newId,
+        //     DateTime.now().year,
+        //     DateTime.now().month,
+        //     DateTime.now().day,
+        //     DateTime.now().hour,
+        //     DateTime.now().minute,
+        //     esEvento: esEvento);
+
+        // Configuración para que la alarma suene el mismo día a las 00:00, no se repita y se oculte
+        Alarm.set(
+            alarmSettings: AlarmSettings(
+                id: newId,
+                // dateTime: DateTime(year, month, day-1),
+
+                // Para pruebas
+                dateTime: DateTime(
+                  year,
+                  month,
+                  day - 1,
+                  DateTime.now().hour,
+                  DateTime.now().minute,
+                  DateTime.now().second + 10,
+                ),
+                assetAudioPath: Assets.audioRingtoneJungle,
+                notificationTitle: "${event.titulo} : ${event.fecha}",
+                notificationBody: event.descripcion,
+                loopAudio: false,
+                volume: 1,
+                vibrate: true,
+                androidFullScreenIntent: false));
+
+        debugPrint("Alarma de evento: id: $newId, ${DateTime(
+          year,
+          month,
+          day - 1,
+          DateTime.now().hour,
+          DateTime.now().minute,
+          DateTime.now().second + 30,
+        )}");
       }
 
       // Actualizar eventos del dia seleccionado

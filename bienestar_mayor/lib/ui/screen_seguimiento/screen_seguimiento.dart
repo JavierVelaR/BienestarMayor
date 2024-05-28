@@ -13,22 +13,7 @@ class ScreenSeguimiento extends StatefulWidget {
 class _ScreenSeguimientoState extends State<ScreenSeguimiento> {
   var scaffoldKey = GlobalKey<ScaffoldState>();
 
-  // List<dynamic> _listaHistorial = List.empty();
-
-  List<dynamic> _listaHistorial = [
-    {
-      "id": 1,
-      "nombre_medicamento": "ibuprofeno",
-      "hora": "2024-04-30 17:00",
-      "tomado": 1,
-    },
-    {
-      "id": 2,
-      "nombre_medicamento": "paracetamol",
-      "hora": "2024-05-01 22:00",
-      "tomado": 0,
-    }
-  ];
+  List<dynamic> _listaHistorial = List.empty();
 
   @override
   void initState() {
@@ -93,15 +78,15 @@ class _ScreenSeguimientoState extends State<ScreenSeguimiento> {
         titleTextStyle: const TextStyle(fontSize: 22, color: Colors.black),
         subtitle: Text("${historic["hora"]}"),
         subtitleTextStyle: const TextStyle(fontSize: 16, color: Colors.black),
-        trailing: historic["tomado"] == 0
+        trailing: historic["tomado"] == 1
             ? const Icon(
-                Icons.gpp_bad,
-                color: Colors.red,
+                Icons.verified_user,
+                color: Colors.green,
                 size: 45,
               )
             : const Icon(
-                Icons.verified_user,
-                color: Colors.green,
+                Icons.gpp_bad,
+                color: Colors.red,
                 size: 45,
               ),
         tileColor: CustomColors.blancoFumee,
@@ -114,17 +99,29 @@ class _ScreenSeguimientoState extends State<ScreenSeguimiento> {
       );
 
   Future<List<dynamic>> _getTomasPasadas(DateTime fecha) async {
+    final String formattedDate =
+        "${fecha.year}-${fecha.month.toString().padLeft(2, '0')}-"
+        "${fecha.day.toString().padLeft(2, '0')} ${fecha.hour.toString().padLeft(2, '0')}:"
+        "${fecha.minute.toString().padLeft(2, '0')}";
+
     final db = DbHelper().db;
+
+    // final query = await db.query(HistorialDao().tableName);
+    //
+    // final lista = query.map((e) => Historial.fromMap(e)).toList();
+    //
+    // return lista;
 
     // Consulta SQL para obtener eventos cuya fecha sea posterior a la fecha especificada
     final List<Map<String, dynamic>> historialMapList = await db.rawQuery('''
     SELECT h.id, m.nombre, r.hora, h.tomado
-    FROM Historial h
-    INNER JOIN Recordatorios r ON h.id_recordatorio = r.id
-    INNER JOIN Medicamentos m ON r.id_medicamento = m.id
-  ''', [
-      fecha.toIso8601String()
-    ]); // Convertir la fecha a un formato compatible con SQLite
+    FROM historial h
+    INNER JOIN recordatorios r ON h.id_recordatorio = r.id
+    INNER JOIN medicamentos m ON r.id_medicamento = m.id
+    -- WHERE r.hora < ?
+  ''',
+      // [formattedDate]
+    );
 
     // Convertir Mapas a Lista de Objetos Evento
     List<dynamic> historialList = historialMapList.map((historialMap) {
@@ -132,7 +129,7 @@ class _ScreenSeguimientoState extends State<ScreenSeguimiento> {
         "id": historialMap['id'],
         "hora": historialMap['hora'],
         "nombre_medicamento": historialMap['nombre'],
-        "tomado": historialMap['tomado'],
+        "tomado": historialMap['tomado'] ?? false,
       };
     }).toList();
 

@@ -141,11 +141,53 @@ class _ScreenMedicamentosState extends State<ScreenMedicamentos> {
         if (result != null  &&  result as bool) _cargarMedicamentos();
       },
     );
+
+    //   GestureDetector(
+    //     onTap: () async {
+    //       final result = await Navigator.pushNamed(
+    //           context, ROUTE_MEDICAMENTO_DETAILS,
+    //           arguments: [med, _cargarMedicamentos]);
+    //       if (result != null && result as bool) _cargarMedicamentos();
+    //     },
+    //     child: Container(
+    //         padding: const EdgeInsets.all(8),
+    //         decoration: BoxDecoration(
+    //             color: Colors.white,
+    //             boxShadow: [BoxShadow(offset: const Offset(0, 4), blurRadius: 4, color: Colors.black.withOpacity(0.25))],
+    //             borderRadius: const BorderRadius.all(Radius.circular(8))),
+    //         child: Column(
+    //           crossAxisAlignment: CrossAxisAlignment.start,
+    //           children: [
+    //             Row(
+    //               children: [
+    //                 Icon(Icons.add),
+    //                 Expanded(
+    //                   child: Text(
+    //                     med.nombre,
+    //                     style: TextStyle(fontSize: 24),
+    //                   ),
+    //                 ),
+    //                 IconButton(
+    //                   onPressed: () => null,
+    //                   icon: Icon(Icons.delete, color: Colors.red[300]),
+    //                 )
+    //               ],
+    //             ),
+    //             const SizedBox(height: 8),
+    //             Text(med.dosis),
+    //             Text("${med.frecuencia}"),
+    //             Text("${med.duracion}"),
+    //           ],
+    //         )),
+    //   );
   }
 
   //////////////////////////////// BASE DE DATOS ////////////////////////////////////
 
   /// TODO: que haya opciones de ordenar (por id, por nombre, por primero en acabar) ¿?
+  ///
+  /// TODO: hacer que cuando se acabe la duración, se elimine el medicamento
+  /// Recorrer todos los recordatorios de todos los medicamento para vr cual ha acabado ¿?
   _cargarMedicamentos() {
     // Lista ordenada por id
     // List<Medicamento> meds = await MedicamentoDao().readAllMedicamentos();
