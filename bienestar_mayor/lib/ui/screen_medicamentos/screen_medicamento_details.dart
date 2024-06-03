@@ -1,9 +1,11 @@
 import 'dart:io';
 
 import 'package:alarm/alarm.dart';
+import 'package:bienestar_mayor/database/dao/historial_dao.dart';
 import 'package:bienestar_mayor/database/dao/medicamento_dao.dart';
 import 'package:bienestar_mayor/database/dao/recordatorio_dao.dart';
 import 'package:bienestar_mayor/database/db_helper.dart';
+import 'package:bienestar_mayor/model/historial.dart';
 import 'package:bienestar_mayor/model/recordatorio.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
@@ -188,6 +190,20 @@ class _ScreenMedicamentoDetailsState extends State<ScreenMedicamentoDetails> {
                                   final listaRecordatorios = query.map((e) => Recordatorio.fromMap(e)).toList();
 
                                   for(Recordatorio rec in listaRecordatorios){
+                                    final queryHistorial = await DbHelper()
+                                        .db
+                                        .query(HistorialDao().tableName,
+                                            where: "id_recordatorio = ?",
+                                            whereArgs: [rec.id]);
+
+                                    final historial = queryHistorial
+                                        .map((e) => Historial.fromMap(e))
+                                        .toList();
+
+                                    HistorialDao()
+                                        .deleteHistorial(historial[0]);
+
+                                    // Eliminar recordatorio
                                     RecordatorioDao().deleteRecordatorio(rec);
                                     // debugPrint("Recordatorio eliminado: id -> ${rec.id}");
 
