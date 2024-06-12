@@ -64,21 +64,61 @@ class _PanelEventosState extends State<PanelEventos> {
               final result = await showDialog(
                 context: context,
                 builder: (_) => AlertDialog(
-                  title: Text(
-                    events[index].titulo,
-                    style: const TextStyle(
-                        fontSize: 30,
-                        fontWeight: FontWeight.w500,
-                        color: Colors.black),
+                  title: const Text(
+                    "Título",
                   ),
                   titleTextStyle: const TextStyle(
                       fontSize: 28,
-                      fontWeight: FontWeight.w500,
+                      fontWeight: FontWeight.w600,
                       color: Colors.black),
-                  contentPadding: const EdgeInsets.all(15),
-                  content: Text(
-                    events[index].descripcion,
-                    style: const TextStyle(fontSize: 20),
+                  contentPadding:
+                      const EdgeInsets.symmetric(vertical: 4, horizontal: 25),
+                  content: SingleChildScrollView(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          events[index].titulo,
+                          style: const TextStyle(
+                              fontSize: 26,
+                              fontWeight: FontWeight.w400,
+                              color: Colors.black),
+                        ),
+                        if (events[index].descripcion != "") ...[
+                          const SizedBox(
+                            height: 15,
+                          ),
+                          const Text(
+                            "Descripción",
+                            style: TextStyle(
+                                fontSize: 26,
+                                fontWeight: FontWeight.w600,
+                                color: Colors.black),
+                          ),
+                          Text(
+                            events[index].descripcion,
+                            style: const TextStyle(fontSize: 22),
+                          ),
+                        ],
+                        const SizedBox(
+                          height: 15,
+                        ),
+                        const Text(
+                          "Fecha",
+                          style: TextStyle(
+                              fontSize: 26,
+                              fontWeight: FontWeight.w600,
+                              color: Colors.black),
+                        ),
+                        Text(
+                          _formatDate(events[index].fecha),
+                          style: const TextStyle(fontSize: 22),
+                        ),
+                        const SizedBox(
+                          height: 15,
+                        ),
+                      ],
+                    ),
                   ),
                   actions: [
                     ElevatedButton(
@@ -105,35 +145,43 @@ class _PanelEventosState extends State<PanelEventos> {
     );
   }
 
-// _dialogConfirm() => showDialog(
-//     context: context,
-//     builder: (context) => AlertDialog(
-//       title: const Text(
-//           "¿Seguro que quieres eliminar el medicamento y sus recordatorios?"),
-//       titleTextStyle: const TextStyle(
-//           fontSize: 22,
-//           fontWeight: FontWeight.w600,
-//           color: Colors.black),
-//       actions: [
-//         TextButton(
-//             onPressed: () async{
-//               // Eliminar medicamento y recordatorios de la db
-//
-//               // Salir de Dialog y salir a pantalla de listado de medicamentos
-//               Navigator.pop(context);
-//               Navigator.pop(context, true);
-//             },
-//             child: const Text("Sí",
-//                 style: TextStyle(
-//                     fontSize: 20, color: Colors.red))),
-//         TextButton(
-//             onPressed: () {
-//               Navigator.pop(context);
-//             },
-//             child: const Text("Cancelar",
-//                 style: TextStyle(
-//                   fontSize: 20,
-//                 ))),
-//       ],
-//     ));
+  String _formatDate(String fecha) {
+    // Parsear la fecha de entrada
+    DateTime dateTime = DateTime.parse(fecha);
+
+    // Lista de nombres de días y meses en español
+    List<String> dias = [
+      "Domingo",
+      "Lunes",
+      "Martes",
+      "Miércoles",
+      "Jueves",
+      "Viernes",
+      "Sábado"
+    ];
+    List<String> meses = [
+      "enero",
+      "febrero",
+      "marzo",
+      "abril",
+      "mayo",
+      "junio",
+      "julio",
+      "agosto",
+      "septiembre",
+      "octubre",
+      "noviembre",
+      "diciembre"
+    ];
+
+    // Obtener el nombre del día y el nombre del mes
+    String diaNombre = dias[dateTime.weekday % 7];
+    String mesNombre = meses[dateTime.month - 1];
+
+    // Formatear la fecha
+    String fechaFormateada = "$diaNombre, ${dateTime.day} de $mesNombre";
+    // " de ${dateTime.year}";
+
+    return fechaFormateada;
+  }
 }
