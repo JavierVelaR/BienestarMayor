@@ -53,8 +53,7 @@ class DrawerCustom extends StatelessWidget {
             _drawerTile("Llamar a emergencias", Icons.emergency, colorIcon: Colors.red, onTapTile: () {
               closeDrawer();
               // Navigator.pushNamed(context, ROUTE_EMERGENCY);
-              /// TODO: Cambiar a numero de emergencias
-              launchUrlString('tel://12341');
+              launchUrlString('tel://061');
             }),
 
             const Divider(height: 50,),

@@ -45,9 +45,8 @@ class _ScreenPrincipalState extends State<ScreenPrincipal> {
                 }, Assets.imagesSeguimiento),
 
                 _cardWithText("Llamar a emergencias", CustomColors.rojo, onTap: () {
-                  /// TODO: Cambiar a numero de emergencias
-                  launchUrlString('tel://12341');
-                  // Navigator.pushNamed(context, ROUTE_EMERGENCY);
+                launchUrlString('tel://061');
+                // Navigator.pushNamed(context, ROUTE_EMERGENCY);
                 }, Assets.imagesEmergencia),
               ],
             ),
