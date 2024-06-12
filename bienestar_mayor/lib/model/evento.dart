@@ -5,8 +5,6 @@ class Evento{
   // YYYY-MM-DD
   final String fecha;
 
-  //TODO: añadir categoria TEXT, para decoracion del calendario
-
   Evento({this.id = -1, required this.titulo,
       this.descripcion = "",
       required this.fecha});

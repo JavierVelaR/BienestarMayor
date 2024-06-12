@@ -50,10 +50,6 @@ class Router{
       case ROUTE_SEGUIMIENTO:
         return MaterialPageRoute(
             builder: (_) => const ScreenSeguimiento(), settings: settings);
-      // case ROUTE_EMERGENCY:
-      //   return MaterialPageRoute(
-      //     ///Cambiar a ScreenEmergency
-      //       builder: (_) => const ScreenCalendar(), settings: settings);
       case ROUTE_ALARM_RINGING:
         final args = settings.arguments as List<AlarmSettings>;
         return MaterialPageRoute(

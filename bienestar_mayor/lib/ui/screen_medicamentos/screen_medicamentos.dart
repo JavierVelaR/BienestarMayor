@@ -54,7 +54,8 @@ class _ScreenMedicamentosState extends State<ScreenMedicamentos> {
   }
 
   _appBar() => AppBar(
-        title: const Text("Medicamentos", style: TextStyle(fontSize: 26)),
+        title: const Text("Medicamentos",
+            style: TextStyle(fontSize: 26, fontWeight: FontWeight.w600)),
         centerTitle: true,
         backgroundColor: CustomColors.azulFrancia,
         toolbarHeight: 70,
@@ -183,11 +184,6 @@ class _ScreenMedicamentosState extends State<ScreenMedicamentos> {
   }
 
   //////////////////////////////// BASE DE DATOS ////////////////////////////////////
-
-  /// TODO: que haya opciones de ordenar (por id, por nombre, por primero en acabar) ¿?
-  ///
-  /// TODO: hacer que cuando se acabe la duración, se elimine el medicamento
-  /// Recorrer todos los recordatorios de todos los medicamento para vr cual ha acabado ¿?
   _cargarMedicamentos() {
     // Lista ordenada por id
     // List<Medicamento> meds = await MedicamentoDao().readAllMedicamentos();

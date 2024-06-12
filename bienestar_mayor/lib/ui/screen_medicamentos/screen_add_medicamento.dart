@@ -1,8 +1,8 @@
 import 'package:alarm/alarm.dart';
 import 'package:alarm/model/alarm_settings.dart';
+import 'package:bienestar_mayor/control/manager_user.dart';
 import 'package:bienestar_mayor/database/dao/medicamento_dao.dart';
 import 'package:bienestar_mayor/database/dao/recordatorio_dao.dart';
-import 'package:bienestar_mayor/generated/assets.dart';
 import 'package:bienestar_mayor/model/medicamento.dart';
 import 'package:bienestar_mayor/model/recordatorio.dart';
 import 'package:bienestar_mayor/theme/custom_colors.dart';
@@ -32,8 +32,6 @@ class _ScreenAddMedicamentoState extends State<ScreenAddMedicamento>
   XFile? _pickedFile;
   String _pickedFilePath = "";
   bool _fotoCogida = false;
-
-  // TODO: mejorar la interfaz, dosificando los inputs a varias pantallas, o paneles
 
   late TabController _tabController;
 
@@ -98,41 +96,6 @@ class _ScreenAddMedicamentoState extends State<ScreenAddMedicamento>
         ],
       ),
     );
-
-    ///////////////////////////////// ANTIGUO LAYOUT ///////////////////////////////////
-    //     Padding(
-    //       padding: const EdgeInsets.all(10.0),
-    //       child: Column(
-    //         mainAxisAlignment: MainAxisAlignment.start,
-    //         crossAxisAlignment: CrossAxisAlignment.center,
-    //         children: [
-    //           const Text("Nombre del medicamento:", style: TextStyle(fontSize: 22, fontWeight: FontWeight.w500),),
-    //           _editName(),
-    //           const Text("Cantidad de dosis:", style: TextStyle(fontSize: 22, fontWeight: FontWeight.w500),),
-    //           const SizedBox(height: 8,),
-    //           _editDosis(),
-    //           const SizedBox(height: 20,),
-    //           const Text("Cada cuantas horas:", style: TextStyle(fontSize: 22, fontWeight: FontWeight.w500),),
-    //           _radioButtonsFrequency(),
-    //           _seleccionarHora(),
-    //           const SizedBox(height: 20,),
-    //           const Text("Duración del tratamiento:", style: TextStyle(fontSize: 22, fontWeight: FontWeight.w500),),
-    //           const SizedBox(height: 10,),
-    //           Text("Inicio: ${_toDate(_selectedDayRange.start.day, _selectedDayRange.start.month)}     "
-    //               "Fin: ${_toDate(_selectedDayRange.end.day, _selectedDayRange.end.month)}",
-    //             style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600, color: CustomColors.zafiro),
-    //           ),
-    //           const SizedBox(height: 10,),
-    //           _editDuration(),
-    //           const SizedBox(height: 20,),
-    //           _addPhoto(),
-    //           const SizedBox(height: 20,),
-    //           _buttons(),
-    //         ],
-    //       ),
-    //     ),
-    //   ),
-    // );
   }
 
   /// Controla el tabBar para ir hacia atrás
@@ -653,19 +616,22 @@ class _ScreenAddMedicamentoState extends State<ScreenAddMedicamento>
 
     _programarAlarma(newId, med, mes, dia, hora, minuto);
   }
-
   _programarAlarma(int idRecordatorio, Medicamento med, int mes, int dia,
       int hora, int minuto) async {
+    // Recoger audio del ManagerUser
+    final path = await ManagerUser().getAlarmSound();
+    final assetsPath = "assets/$path";
+
     final alarmSettings = AlarmSettings(
         id: idRecordatorio,
         dateTime: DateTime(2024, mes, dia, hora, minuto),
-        assetAudioPath: Assets.audioOversimplified,
+        assetAudioPath: assetsPath,
         notificationTitle: 'Toma de ${med.nombre}',
         notificationBody: 'Tomar ${med.dosis} de ${med.nombre}',
         fadeDuration: 3.0,
         loopAudio: true,
         vibrate: true,
-        volume: 1,
+        volume: await ManagerUser().getAlarmVolume(),
         androidFullScreenIntent: true,
         enableNotificationOnKill: true);
 

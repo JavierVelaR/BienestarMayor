@@ -51,6 +51,7 @@ dependencies:
   flutter_launcher_icons: ^0.13.1
   flutter_local_notifications: ^16.0.0
   flutter_timezone: ^1.0.8
+  audioplayers: ^6.0.0
 
 dev_dependencies:
   flutter_test:

@@ -47,7 +47,6 @@ class _PanelEventosState extends State<PanelEventos> {
         ),
         itemCount: events.length,
 
-        // TODO: añadir segun la categoria, un leading de icono con color de la categoria
         // Listar cada evento del dia seleccionado
         itemBuilder: (_, index) => ListTile(
             title: Text(events[index].titulo),
@@ -83,7 +82,8 @@ class _PanelEventosState extends State<PanelEventos> {
                   ),
                   actions: [
                     ElevatedButton(
-                        onPressed: () {
+                        onPressed: () async {
+                          // final result = await _dialogConfirm();
                           widget._function(events[index]);
                           Navigator.pop(context, true);
                         },
@@ -105,4 +105,35 @@ class _PanelEventosState extends State<PanelEventos> {
     );
   }
 
+// _dialogConfirm() => showDialog(
+//     context: context,
+//     builder: (context) => AlertDialog(
+//       title: const Text(
+//           "¿Seguro que quieres eliminar el medicamento y sus recordatorios?"),
+//       titleTextStyle: const TextStyle(
+//           fontSize: 22,
+//           fontWeight: FontWeight.w600,
+//           color: Colors.black),
+//       actions: [
+//         TextButton(
+//             onPressed: () async{
+//               // Eliminar medicamento y recordatorios de la db
+//
+//               // Salir de Dialog y salir a pantalla de listado de medicamentos
+//               Navigator.pop(context);
+//               Navigator.pop(context, true);
+//             },
+//             child: const Text("Sí",
+//                 style: TextStyle(
+//                     fontSize: 20, color: Colors.red))),
+//         TextButton(
+//             onPressed: () {
+//               Navigator.pop(context);
+//             },
+//             child: const Text("Cancelar",
+//                 style: TextStyle(
+//                   fontSize: 20,
+//                 ))),
+//       ],
+//     ));
 }

@@ -1,8 +1,8 @@
 import 'package:alarm/alarm.dart';
 import 'package:alarm/model/alarm_settings.dart';
+import 'package:bienestar_mayor/control/manager_user.dart';
 import 'package:bienestar_mayor/database/dao/evento_dao.dart';
 import 'package:bienestar_mayor/database/db_helper.dart';
-import 'package:bienestar_mayor/generated/assets.dart';
 import 'package:bienestar_mayor/model/evento.dart';
 import 'package:bienestar_mayor/theme/custom_colors.dart';
 import 'package:bienestar_mayor/ui/screen_calendar/panel_eventos.dart';
@@ -67,7 +67,8 @@ class _ScreenCalendarState extends State<ScreenCalendar> {
   }
 
   _appBar() => AppBar(
-        title: const Text("Calendario", style: TextStyle(fontSize: 26)),
+        title: const Text("Calendario",
+            style: TextStyle(fontSize: 26, fontWeight: FontWeight.w600)),
         centerTitle: true,
         backgroundColor: CustomColors.verdeBosque,
         toolbarHeight: 70,
@@ -100,8 +101,6 @@ class _ScreenCalendarState extends State<ScreenCalendar> {
     diaController.text = _selectedDay.day.toString();
     final mesController = TextEditingController();
     mesController.text = _selectedDay.month.toString();
-
-    // LocalNotification.displayNotification();
 
     final result = await showDialog(
         context: context,
@@ -249,54 +248,52 @@ class _ScreenCalendarState extends State<ScreenCalendar> {
 
   _saveEventAndScheduleNotification(
       Evento event, int year, int month, int day, bool esEvento) {
-    _insertEvento(event).then((newId) {
-      if (DateTime(year, month, day - 1).isAfter(DateTime(
+    _insertEvento(event).then((newId) async {
+      if (DateTime(year, month, day).isAfter(DateTime(
           DateTime.now().year,
           DateTime.now().month,
-          DateTime.now().day - 1,
+          DateTime.now().day,
           DateTime.now().minute,
           DateTime.now().second))) {
         // Programar notificación
         // TODO: manejar que si es inicio de mes, se ponga el ultimo dia del mes anterior, y si es el 01/01, que se ponga el 31/12
 
-        // LocalNotification.scheduleNotification(newId, year, month, day-1, 0, 0, esEvento: esEvento);
-
-        // LocalNotification.scheduleNotification(
-        //     newId,
-        //     DateTime.now().year,
-        //     DateTime.now().month,
-        //     DateTime.now().day,
-        //     DateTime.now().hour,
-        //     DateTime.now().minute,
-        //     esEvento: esEvento);
+        // Recoger audio del ManagerUser
+        final path = await ManagerUser().getNotificationSound();
+        final assetsPath = "assets/$path";
 
         // Configuración para que la alarma suene el mismo día a las 00:00, no se repita y se oculte
         Alarm.set(
             alarmSettings: AlarmSettings(
                 id: newId,
-                // dateTime: DateTime(year, month, day-1),
+                // dateTime: DateTime(year, month, day),
 
                 // Para pruebas
                 dateTime: DateTime(
                   year,
                   month,
-                  day - 1,
+                  DateTime.now().day,
                   DateTime.now().hour,
                   DateTime.now().minute,
                   DateTime.now().second + 10,
                 ),
-                assetAudioPath: Assets.audioRingtoneJungle,
+                assetAudioPath: assetsPath,
                 notificationTitle: "${event.titulo} : ${event.fecha}",
                 notificationBody: event.descripcion,
                 loopAudio: false,
-                volume: 1,
+                volume: await ManagerUser().getAlarmVolume(),
                 vibrate: true,
                 androidFullScreenIntent: false));
+
+        // Parar la alarma de evento
+        Future.delayed(const Duration(seconds: 25)).then((value) {
+          Alarm.stop(newId);
+        });
 
         debugPrint("Alarma de evento: id: $newId, ${DateTime(
           year,
           month,
-          day - 1,
+          DateTime.now().day,
           DateTime.now().hour,
           DateTime.now().minute,
           DateTime.now().second + 30,
@@ -321,10 +318,11 @@ class _ScreenCalendarState extends State<ScreenCalendar> {
       _cargarEventos();
       _cargarEventosDia();
     });
+
+    // Borrar la alarma del evento
+    Alarm.stop(event.id);
   }
 
-  /// TODO: Añadir a la tabla evento el campo categoria TEXT
-  /// a ser posible con color especifico de la categoria (cita médica, tratamiento, ocio, personal)
   _calendar() {
     return TableCalendar(
       locale: "es_ES",
@@ -396,11 +394,6 @@ class _ScreenCalendarState extends State<ScreenCalendar> {
         markerSize: 9,
         markersMaxCount: 3,
         markerMargin: EdgeInsets.symmetric(horizontal: 0.8),
-        // markerDecoration: BoxDecoration(
-        //   // TODO: color de la categoría
-        //     color: Colors.black,
-        //
-        //     borderRadius: BorderRadius.all(Radius.circular(100)))
       ),
 
       onFormatChanged: (CalendarFormat format) {
@@ -414,8 +407,6 @@ class _ScreenCalendarState extends State<ScreenCalendar> {
           _selectedDay = day;
           _focusedDay = focusedDay;
           _cargarEventosDia();
-          debugPrint(
-              "<-----------> Se cargan los eventos del dia ${day.day} de ${day.month}");
         });
       },
 

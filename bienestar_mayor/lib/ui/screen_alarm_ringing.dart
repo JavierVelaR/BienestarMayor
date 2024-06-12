@@ -24,21 +24,22 @@ class _ScreenAlarmRingingState extends State<ScreenAlarmRinging> {
     return Scaffold(
       appBar: _appBar(),
       body: Column(
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           SizedBox(
-            height: MediaQuery.sizeOf(context).height / 5,
+            height: MediaQuery.sizeOf(context).height / 8,
           ),
           widget.alarms.length == 1
               ? const Text(
-                  "Ha sonado un recordatorio:",
-                  style: TextStyle(fontSize: 30),
+                  "Ha sonado un\nrecordatorio:",
+                  style: TextStyle(fontSize: 35, fontWeight: FontWeight.w600),
                 )
               : Text("Han sonado ${widget.alarms.length} recordatorios:",
                   style: const TextStyle(
-                    fontSize: 30,
+                    fontSize: 35,
                   )),
           const SizedBox(
-            height: 20,
+            height: 40,
           ),
           _listAlarms(),
           const SizedBox(
@@ -49,15 +50,19 @@ class _ScreenAlarmRingingState extends State<ScreenAlarmRinging> {
             children: [
               ElevatedButton(
                   onPressed: () async {
+                    Navigator.pushNamedAndRemoveUntil(
+                        context, ROUTE_PRINCIPAL, (route) => false);
+                  },
+                  child: const Text("No puedo",
+                      style:
+                          TextStyle(fontSize: 20, color: CustomColors.rojo))),
+              ElevatedButton(
+                  onPressed: () async {
                     _tomado = true;
 
-                    // Si la alarma que ha sonado, ya habia sonado antes, se actualiza, sino, se inserta
-                    // todo: hacer pruebas
                     for (var alarm in widget.alarms) {
                       if (await _historialExists(alarm.id)) {
                         _updateHistorial(alarm.id);
-                      } else {
-                        _insertHistorial(alarm.id);
                       }
                     }
 
@@ -67,51 +72,46 @@ class _ScreenAlarmRingingState extends State<ScreenAlarmRinging> {
                   child: Text(
                       "Me lo${widget.alarms.length > 1 ? "s" : ""} he tomado",
                       style: const TextStyle(
-                        fontSize: 16,
-                      ))),
-              ElevatedButton(
-                  onPressed: () {
-                    _tomado = false;
-
-                    for (var alarm in widget.alarms) {
-                      _insertHistorial(alarm.id);
-                    }
-
-                    // todo: postponer alarma, que salga un dialog pidiendo un numero, y si el dialog
-                    // devuelve true, navigator.pop, sino, solo se cierra
-
-                    for (var alarm in widget.alarms) {
-                      Alarm.set(
-                          alarmSettings: AlarmSettings(
-                              id: alarm.id,
-
-                              // dateTime: alarm.dateTime.add(const Duration(minutes: 2),
-
-                              // para pruebas
-                              dateTime: alarm.dateTime
-                                  .add(const Duration(seconds: 15)),
-                              assetAudioPath: alarm.assetAudioPath,
-                              notificationTitle: alarm.notificationTitle,
-                              notificationBody: alarm.notificationBody,
-                              volume: alarm.volume,
-                              vibrate: alarm.vibrate,
-                              loopAudio: alarm.loopAudio,
-                              fadeDuration: alarm.fadeDuration,
-                              androidFullScreenIntent:
-                                  alarm.androidFullScreenIntent,
-                              enableNotificationOnKill:
-                                  alarm.enableNotificationOnKill));
-                    }
-
-                    Navigator.pushNamedAndRemoveUntil(
-                        context, ROUTE_PRINCIPAL, (route) => false);
-                  },
-                  child: const Text("Más tarde",
-                      style: TextStyle(
-                        fontSize: 16,
+                        fontSize: 20,
+                        color: CustomColors.verdeEsmeralda,
                       ))),
             ],
           ),
+          const SizedBox(
+            height: 10,
+          ),
+          ElevatedButton(
+              onPressed: () async {
+                // todo: postponer alarma, con el valor del ManagerUser ¿?
+                for (var alarm in widget.alarms) {
+                  Alarm.set(
+                      alarmSettings: AlarmSettings(
+                          id: alarm.id,
+                          dateTime:
+                              alarm.dateTime.add(const Duration(minutes: 5)),
+
+                          // para pruebas
+                          // dateTime: alarm.dateTime.add(const Duration(minutes: 2)),
+
+                          assetAudioPath: alarm.assetAudioPath,
+                          notificationTitle: alarm.notificationTitle,
+                          notificationBody: alarm.notificationBody,
+                          volume: alarm.volume,
+                          vibrate: alarm.vibrate,
+                          loopAudio: alarm.loopAudio,
+                          fadeDuration: alarm.fadeDuration,
+                          androidFullScreenIntent:
+                              alarm.androidFullScreenIntent,
+                          enableNotificationOnKill:
+                              alarm.enableNotificationOnKill));
+                }
+
+                Navigator.pushNamedAndRemoveUntil(
+                    context, ROUTE_PRINCIPAL, (route) => false);
+              },
+              child: const Text("Más tarde",
+                  style:
+                      TextStyle(fontSize: 20, color: CustomColors.azulFrancia)))
         ],
       ),
     );
@@ -183,11 +183,11 @@ class _ScreenAlarmRingingState extends State<ScreenAlarmRinging> {
     }
   }
 
-  Future<bool> _historialExists(int idHistorial) async {
+  Future<bool> _historialExists(int idRecordatorio) async {
     final db = DbHelper().db;
 
     final query = await db.query(HistorialDao().tableName,
-        where: 'id_recordatorio = ?', whereArgs: [idHistorial]);
+        where: 'id_recordatorio = ?', whereArgs: [idRecordatorio]);
     final historialList =
         query.map((historialMap) => Historial.fromMap(historialMap)).toList();
 

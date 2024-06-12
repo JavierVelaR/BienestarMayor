@@ -1,3 +1,4 @@
+import 'package:audioplayers/audioplayers.dart';
 import 'package:bienestar_mayor/control/manager_user.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -21,12 +22,65 @@ class _ScreenConfigUserState extends State<ScreenConfigUser> {
   final _emailController = TextEditingController();
   String _textError = "";
 
-  List<bool> selectedOption = <bool>[true,false];
-  bool _selected = false;
+  final AudioPlayer _audioPlayer = AudioPlayer();
+
+  String? _selectedAlarmTone;
+
+  String? _selectedNotificationTone;
+
+  final List<String> _alarmTones = [
+    "audio/morning_joy.mp3",
+    "audio/ringtone.mp3",
+    "audio/oversimplified.mp3",
+    "audio/chiptune.mp3"
+  ];
+
+  // todo: añadir más tonos de notificacion
+  String? _selectedNotifTone;
+
+  final List<String> _notificationTones = [
+    'audio/ringtone_jungle.mp3',
+    'audio/Arpeggio.mp3',
+    'audio/Asteroid.mp3',
+    'audio/Bell-Android.mp3',
+    'audio/Charm-original.mp3',
+    'audio/Childlike-Android.mp3',
+    'audio/Circles.mp3',
+    'audio/Old-Car-Horn-iPhone.mp3',
+    'audio/Shooting_Star-Android.mp3',
+    'audio/Twinkle-original.mp3',
+  ];
+
+  double _volumeValue = 10;
+
+  void _playAudio(String audioPath) async {
+    await _audioPlayer.setSource(AssetSource(audioPath));
+    _audioPlayer.setVolume(await ManagerUser().getAlarmVolume());
+    await _audioPlayer.resume();
+  }
+
+  void _confirmAlarmSelection() {
+    if (_selectedAlarmTone != null)
+      ManagerUser().setAlarmSound(_selectedAlarmTone!);
+    Fluttertoast.showToast(
+        msg:
+            "Tono de alarma cambiado a: ${_selectedAlarmTone.toString().split('/').last.split('.').first}");
+    _audioPlayer.stop();
+  }
+
+  void _confirmNotificationSelection() {
+    if (_selectedNotificationTone != null)
+      ManagerUser().setNotificationSound(_selectedNotificationTone!);
+    Fluttertoast.showToast(
+        msg:
+            "Tono de alarma cambiado a: ${_selectedNotificationTone.toString().split('/').last.split('.').first}");
+    _audioPlayer.stop();
+  }
 
   @override
   void initState() {
     super.initState();
+    _cargarInfo();
     _cargarDatos();
   }
 
@@ -34,22 +88,87 @@ class _ScreenConfigUserState extends State<ScreenConfigUser> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: _appBar(),
-      body: Column(
-        children: [
-          _userData(),
-          const SizedBox(height: 30,),
-          const Text("Repetir alarmas si no se apaga:", style: TextStyle(fontSize: 20),),
-          _repetirAlarmas(),
-          Switch.adaptive(
-              value: _selected,
-              onChanged: (selected) {
-                setState(() {
-                  _selected = selected;
-                });
-              }),
+      body: SingleChildScrollView(
+        child: Column(
+          children: [
+            _userData(),
+            const SizedBox(
+              height: 30,
+            ),
+            const Text(
+              "Cambiar tono de alarma:",
+              style: TextStyle(fontSize: 20),
+            ),
+            _dropdownAlarmTones(),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                ElevatedButton(
+                  onPressed: _selectedAlarmTone != null
+                      ? () => _playAudio(_selectedAlarmTone!)
+                      : null,
+                  child: const Text('Reproducir'),
+                ),
+                ElevatedButton(
+                  onPressed: _selectedAlarmTone != null
+                      ? _confirmAlarmSelection
+                      : null,
+                  child: const Text('Confirmar'),
+                ),
+              ],
+            ),
+            const SizedBox(
+              height: 30,
+            ),
+            const Text(
+              "Cambiar tono de notificación:",
+              style: TextStyle(fontSize: 20),
+            ),
+            _dropdownNotificationTones(),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                ElevatedButton(
+                  onPressed: _selectedNotificationTone != null
+                      ? () => _playAudio(_selectedNotificationTone!)
+                      : null,
+                  child: const Text('Reproducir'),
+                ),
+                ElevatedButton(
+                  onPressed: _selectedNotificationTone != null
+                      ? _confirmNotificationSelection
+                      : null,
+                  child: const Text('Confirmar'),
+                ),
+              ],
+            ),
 
-          ///TODO: numeros de familiares para llamar al pulsar emergencia
-        ],
+            const SizedBox(
+              height: 30,
+            ),
+            const Text(
+              "Volumen de los recordatorios:",
+              style: TextStyle(fontSize: 20),
+            ),
+            Slider(
+              min: 1,
+              max: 10,
+              divisions: 9,
+              label: _volumeValue.toStringAsFixed(0),
+              value: _volumeValue,
+              onChanged: (newValue) async {
+                _volumeValue = newValue;
+                _audioPlayer.setVolume(await ManagerUser().getAlarmVolume());
+                ManagerUser().setAlarmVolume(_volumeValue / 10);
+                setState(() {});
+              },
+            ),
+
+            // Todo: numero de minutos del posponer?
+
+            // todo: numeros de familiares para llamar al pulsar emergencia FUTURO
+          ],
+        ),
       ),
     );
   }
@@ -64,7 +183,6 @@ class _ScreenConfigUserState extends State<ScreenConfigUser> {
       backgroundColor: CustomColors.verdeBosque,
       toolbarHeight: 70,
       shadowColor: Colors.black,
-      // leading: IconButton(icon: const Icon(Icons.menu, color: Colors.white, size: 55,), onPressed: (){ _showMenu(); },),
     );
   }
 
@@ -127,28 +245,45 @@ class _ScreenConfigUserState extends State<ScreenConfigUser> {
         ],
       );
 
-  _repetirAlarmas(){
-    return ToggleButtons(
-          isSelected: selectedOption,
-          borderRadius: const BorderRadius.all(Radius.circular(8)),
-          selectedBorderColor: Colors.blue[700],
-          selectedColor: Colors.white,
-          fillColor: Colors.blue[300],
-          textStyle: const TextStyle(fontSize: 16),
-          onPressed: (int index) {
-            /// TODO: alternar variable booleana en SharedPreferences desde ManagerUser
-            setState(() {
-              for (int i = 0; i < selectedOption.length; i++) {
-                selectedOption[i] = i == index;
-              }
-            });
-          },
-          children: const [
-            Text("No"),
-            Text("Sí"),
-          ],
-    );
-  }
+  _dropdownAlarmTones() => DropdownButton<String>(
+        value: _selectedAlarmTone,
+        hint: const Text('Selecciona un tono'),
+        items: _alarmTones.map((String tone) {
+          return DropdownMenuItem<String>(
+            value: tone,
+            child: Text(tone
+                .split('/')
+                .last
+                .split('.')
+                .first), // Muestra solo el nombre del archivo
+          );
+        }).toList(),
+        onChanged: (String? newValue) {
+          setState(() {
+            _selectedAlarmTone = newValue;
+          });
+        },
+      );
+
+  _dropdownNotificationTones() => DropdownButton<String>(
+        value: _selectedNotificationTone,
+        hint: const Text('Selecciona un tono'),
+        items: _notificationTones.map((String tone) {
+          return DropdownMenuItem<String>(
+            value: tone,
+            child: Text(tone
+                .split('/')
+                .last
+                .split('.')
+                .first), // Muestra solo el nombre del archivo
+          );
+        }).toList(),
+        onChanged: (String? newValue) {
+          setState(() {
+            _selectedNotificationTone = newValue;
+          });
+        },
+      );
 
 ///////////////////////////// ACCIONES /////////////////////////////////
   _onEditClick(BuildContext context) {
@@ -159,42 +294,64 @@ class _ScreenConfigUserState extends State<ScreenConfigUser> {
             title: const Text("Editar usuario"),
             titleTextStyle: const TextStyle(
                 fontSize: 28, color: Colors.black, fontWeight: FontWeight.bold),
-            content: Column(
-                mainAxisAlignment: MainAxisAlignment.start,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text("Nombre", style: TextStyle(fontSize: 24, fontWeight: FontWeight.w500, color: CustomColors.zafiro)),
-                  _editUsername(),
-                  const SizedBox(height: 40,),
-                  const Row(
-                    children: [
-                      Text("Email", style: TextStyle(fontSize: 24, fontWeight: FontWeight.w500, color: CustomColors.zafiro)),
-                      SizedBox(width: 10,),
-                      Text("* Opcional", style: TextStyle(fontSize: 16, color: Colors.red),)
-                    ],
-                  ),
-                  _editEmail(),
-                  const SizedBox(height: 15,),
-                  _showErrorLabel(),
-                  const SizedBox(height: 30,),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceAround,
-                    children: [
-                      ElevatedButton(
-                          onPressed: () {
-                            setState(() {
-                              _guardar(context);
-                            });
-                            }, child: const Text("Guardar")),
-                      ElevatedButton(
-                          onPressed: () {
-                            setState(() {});
-                            Navigator.of(context).pop();
-                            }, child: const Text("Cerrar")),
-                    ],
-                  )
-
-                ]),
+            content: SingleChildScrollView(
+              child: Column(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text("Nombre",
+                        style: TextStyle(
+                            fontSize: 24,
+                            fontWeight: FontWeight.w500,
+                            color: CustomColors.zafiro)),
+                    _editUsername(),
+                    const SizedBox(
+                      height: 40,
+                    ),
+                    const Row(
+                      children: [
+                        Text("Email",
+                            style: TextStyle(
+                                fontSize: 24,
+                                fontWeight: FontWeight.w500,
+                                color: CustomColors.zafiro)),
+                        SizedBox(
+                          width: 10,
+                        ),
+                        Text(
+                          "* Opcional",
+                          style: TextStyle(fontSize: 16, color: Colors.red),
+                        )
+                      ],
+                    ),
+                    _editEmail(),
+                    const SizedBox(
+                      height: 15,
+                    ),
+                    _showErrorLabel(),
+                    const SizedBox(
+                      height: 30,
+                    ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceAround,
+                      children: [
+                        ElevatedButton(
+                            onPressed: () {
+                              setState(() {
+                                _guardar(context);
+                              });
+                            },
+                            child: const Text("Guardar")),
+                        ElevatedButton(
+                            onPressed: () {
+                              setState(() {});
+                              Navigator.of(context).pop();
+                            },
+                            child: const Text("Cerrar")),
+                      ],
+                    )
+                  ]),
+            ),
             elevation: 10,
             shadowColor: CustomColors.negro,
           );
@@ -260,6 +417,15 @@ class _ScreenConfigUserState extends State<ScreenConfigUser> {
       if (_email != null) _emailController.text = _email!;
     });
 
+  }
+
+  _cargarInfo() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    // _selectedAlarmTone = prefs.getString(ManagerUser.ALARM_SOUND)!.substring(7);
+    // _selectedNotificationTone = prefs.getString(ManagerUser.NOTIFICATION_SOUND)!.substring(7);
+    _volumeValue = (prefs.getDouble(ManagerUser.ALARM_VOLUME) ?? 1) * 10;
+
+    setState(() {});
   }
 
 /////////////////////// CAMPOS DEL DIALOG //////////////////////////

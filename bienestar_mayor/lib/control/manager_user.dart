@@ -1,5 +1,6 @@
 
 // import 'package:prueba_login/api/responses/response_login.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 // import 'package:jwt_decoder/jwt_decoder.dart';
 
@@ -27,6 +28,48 @@ class ManagerUser {
   /// Preferencias
   static const PREFS_USERNAME = "username";
   static const PREFS_USER_EMAIL = "user_email";
+  static const ALARM_SOUND = "alarm_sound";
+  static const NOTIFICATION_SOUND = "notification_sound";
+  static const ALARM_VOLUME = "alarm_volume";
+
+  Future<String> getAlarmSound() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    return prefs.getString(ALARM_SOUND) ?? "assets/audio/oversimplified.mp3";
+  }
+
+  setAlarmSound(String path) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.setString(ALARM_SOUND, path);
+  }
+
+  Future<String> getNotificationSound() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    return prefs.getString(NOTIFICATION_SOUND) ??
+        "assets/audio/ringtone_jungle.mp3";
+  }
+
+  setNotificationSound(String path) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.setString(NOTIFICATION_SOUND, path);
+  }
+
+  Future<double> getAlarmVolume() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    return prefs.getDouble(ALARM_VOLUME) ?? 1;
+  }
+
+  setAlarmVolume(double value) async {
+    double volume = value;
+    if (value > 1) {
+      volume = 1;
+    } else if (value < 0) {
+      volume = 0;
+    }
+
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.setDouble(ALARM_VOLUME, volume);
+    debugPrint("volumen de alarma: $volume");
+  }
 
   /// Guarda la sesion en preferencias
   saveSessionToPrefs(String username, String email) async{

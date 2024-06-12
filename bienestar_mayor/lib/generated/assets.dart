@@ -2,11 +2,24 @@
 class Assets {
   Assets._();
 
+  static const String audioArpeggio = 'assets/audio/Arpeggio.mp3';
+  static const String audioAsteroid = 'assets/audio/Asteroid.mp3';
+  static const String audioBellAndroid = 'assets/audio/Bell-Android.mp3';
+  static const String audioCharmOriginal = 'assets/audio/Charm-original.mp3';
+  static const String audioChildlikeAndroid =
+      'assets/audio/Childlike-Android.mp3';
   static const String audioChiptune = 'assets/audio/chiptune.mp3';
+  static const String audioCircles = 'assets/audio/Circles.mp3';
   static const String audioMorningJoy = 'assets/audio/morning_joy.mp3';
+  static const String audioOldCarHornIPhone =
+      'assets/audio/Old-Car-Horn-iPhone.mp3';
   static const String audioOversimplified = 'assets/audio/oversimplified.mp3';
   static const String audioRingtone = 'assets/audio/ringtone.mp3';
   static const String audioRingtoneJungle = 'assets/audio/ringtone_jungle.mp3';
+  static const String audioShootingStarAndroid =
+      'assets/audio/Shooting_Star-Android.mp3';
+  static const String audioTwinkleOriginal =
+      'assets/audio/Twinkle-original.mp3';
   static const String imagesBienestarMayorLogo = 'assets/images/bienestar_mayor_logo.svg';
   static const String imagesBienestarMayorLogo2 = 'assets/images/bienestar_mayor_logo2.png';
   static const String imagesCalendario = 'assets/images/calendario.svg';
