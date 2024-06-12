@@ -67,19 +67,24 @@ class _ScreenSeguimientoState extends State<ScreenSeguimiento> {
         },
       );
 
-  _historicTile(historic) => ListTile(
-        leading: Icon(
+  _historicTile(historic) {
+    final nombre = "${historic["nombre_medicamento"]}";
+    final fechaHora = "${historic["hora"]}";
+    final tomado = historic["tomado"];
+
+    return ListTile(
+      leading: Icon(
           Icons.newspaper,
           color: Colors.grey[400],
           size: 40,
         ),
         horizontalTitleGap: 20,
-        title: Text("${historic["nombre_medicamento"]}"),
-        titleTextStyle: const TextStyle(fontSize: 22, color: Colors.black),
-        subtitle: Text("${historic["hora"]}"),
-        subtitleTextStyle: const TextStyle(fontSize: 16, color: Colors.black),
-        trailing: historic["tomado"] == 1
-            ? const Icon(
+      title: Text(nombre),
+      titleTextStyle: const TextStyle(fontSize: 22, color: Colors.black),
+      subtitle: Text(fechaHora),
+      subtitleTextStyle: const TextStyle(fontSize: 16, color: Colors.black),
+      trailing: tomado == 1
+          ? const Icon(
                 Icons.verified_user,
                 color: Colors.green,
                 size: 45,
@@ -94,9 +99,75 @@ class _ScreenSeguimientoState extends State<ScreenSeguimiento> {
             side: BorderSide(color: Colors.black54), //the outline color
             borderRadius: BorderRadius.all(Radius.circular(12))),
         onTap: () {
-          // Dialog detalles ¿?
-        },
+        showDialog(
+          context: context,
+          builder: (_) => AlertDialog(
+            title: const Text(
+              "Medicamento",
+            ),
+            titleTextStyle: const TextStyle(
+                fontSize: 28, fontWeight: FontWeight.w600, color: Colors.black),
+            contentPadding:
+                const EdgeInsets.symmetric(vertical: 4, horizontal: 25),
+            content: SingleChildScrollView(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    nombre,
+                    style: const TextStyle(
+                        fontSize: 26,
+                        fontWeight: FontWeight.w400,
+                        color: Colors.black),
+                  ),
+                  const SizedBox(
+                    height: 15,
+                  ),
+                  const Text(
+                    "Fecha y hora",
+                    style: TextStyle(
+                        fontSize: 26,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.black),
+                  ),
+                  Text(
+                    "El ${_formatDateHour(fechaHora)[0]}",
+                    style: const TextStyle(fontSize: 22),
+                  ),
+                  Text(
+                    "a las ${_formatDateHour(fechaHora)[1]}",
+                    style: const TextStyle(fontSize: 22),
+                  ),
+                  const SizedBox(
+                    height: 15,
+                  ),
+                  const Text(
+                    "Toma realizada",
+                    style: TextStyle(
+                        fontSize: 26,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.black),
+                  ),
+                  tomado == 1
+                      ? const Text(
+                          "Sí",
+                          style: TextStyle(fontSize: 22, color: Colors.green),
+                        )
+                      : const Text(
+                          "No",
+                          style: TextStyle(fontSize: 22, color: Colors.red),
+                        ),
+                  const SizedBox(
+                    height: 15,
+                  ),
+                ],
+              ),
+            ),
+          ),
+        );
+      },
       );
+  }
 
   Future<List<dynamic>> _getTomasPasadas(DateTime fecha) async {
     final String formattedDate =
@@ -141,5 +212,82 @@ class _ScreenSeguimientoState extends State<ScreenSeguimiento> {
     setState(() {
       _listaHistorial = list;
     });
+  }
+
+  // List<String> _formatDateHour(String fechaHora) {
+  //   // Parsear la fecha y hora de entrada
+  //   DateTime dateTime = DateTime.parse(fechaHora);
+  //
+  //   // Lista de nombres de días y meses en español
+  //   List<String> dias = ["Domingo", "Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado"];
+  //   List<String> meses = ["enero", "febrero", "marzo", "abril", "mayo", "junio", "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre"];
+  //
+  //   // Obtener el nombre del día y el nombre del mes
+  //   String diaNombre = dias[dateTime.weekday % 7];
+  //   String mesNombre = meses[dateTime.month - 1];
+  //
+  //   // Formatear la fecha
+  //   String fechaFormateada = "$diaNombre, ${dateTime.day} de $mesNombre";
+  //
+  //   // Formatear la hora
+  //   String horaFormateada = "${dateTime.hour.toString().padLeft(2, '0')}:${dateTime.minute.toString().padLeft(2, '0')}";
+  //
+  //   return [fechaFormateada, horaFormateada];
+  // }
+
+  List<String> _formatDateHour(String fechaHora) {
+    // Asegurarse de que el formato de la cadena sea correcto (YYYY-MM-DD HH:MM)
+    List<String> partes = fechaHora.split(' ');
+    List<String> fechaPartes = partes[0].split('-');
+    List<String> horaPartes = partes[1].split(':');
+
+    // Normalizar los valores a dos dígitos donde sea necesario
+    String anio = fechaPartes[0];
+    String mes = fechaPartes[1].padLeft(2, '0');
+    String dia = fechaPartes[2].padLeft(2, '0');
+    String hora = horaPartes[0].padLeft(2, '0');
+    String minuto = horaPartes[1].padLeft(2, '0');
+
+    // Reconstruir la fecha y hora en formato válido para DateTime
+    String fechaHoraNormalizada = '$anio-$mes-$dia $hora:$minuto';
+    DateTime dateTime = DateTime.parse(fechaHoraNormalizada);
+
+    // Lista de nombres de días y meses en español
+    List<String> dias = [
+      "domingo",
+      "lunes",
+      "martes",
+      "miércoles",
+      "jueves",
+      "viernes",
+      "sábado"
+    ];
+    List<String> meses = [
+      "enero",
+      "febrero",
+      "marzo",
+      "abril",
+      "mayo",
+      "junio",
+      "julio",
+      "agosto",
+      "septiembre",
+      "octubre",
+      "noviembre",
+      "diciembre"
+    ];
+
+    // Obtener el nombre del día y el nombre del mes
+    String diaNombre = dias[dateTime.weekday % 7];
+    String mesNombre = meses[dateTime.month - 1];
+
+    // Formatear la fecha
+    String fechaFormateada = "$diaNombre, ${dateTime.day} de $mesNombre";
+
+    // Formatear la hora
+    String horaFormateada =
+        "${dateTime.hour.toString().padLeft(2, '0')}:${dateTime.minute.toString().padLeft(2, '0')}";
+
+    return [fechaFormateada, horaFormateada];
   }
 }
