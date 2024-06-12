@@ -29,6 +29,7 @@ class _ScreenMedicamentoDetailsState extends State<ScreenMedicamentoDetails> {
   String _fotoPath = "";
   XFile? _pickedFile;
   bool _tieneFoto = false;
+  String _horasTomaText = "";
 
   @override
   void initState() {
@@ -36,6 +37,8 @@ class _ScreenMedicamentoDetailsState extends State<ScreenMedicamentoDetails> {
     if (widget._medicamento.foto != null)
       _fotoPath = XFile(widget._medicamento.foto!).path;
     if (_fotoPath.isNotEmpty) _tieneFoto = true;
+
+    _getHorasToma();
   }
 
   // TODO: Mejorar recuadro de foto, ver si está vertical o en paisaje, que muestre las horas de toma
@@ -52,104 +55,110 @@ class _ScreenMedicamentoDetailsState extends State<ScreenMedicamentoDetails> {
       floatingActionButtonLocation: FloatingActionButtonLocation.startFloat,
       floatingActionButton: _floatingActionButton(),
       body: Padding(
-        padding: const EdgeInsets.all(8.0),
+        padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 20),
         child: Column(
+          mainAxisAlignment: MainAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                _fotoPath.isNotEmpty
-                    ? Column(children: [
-                        Container(
-                          width: MediaQuery.sizeOf(context).width / 1.75,
-                          height: MediaQuery.sizeOf(context).height / 3.75,
-                          alignment: Alignment.center,
-                          // decoration: BoxDecoration(
-                          //   border: Border.all(color: Colors.black),
-                          //   borderRadius: const BorderRadius.all(Radius.circular(20))
-                          // ),
-                          child: Image.file(File(XFile(_fotoPath).path)),
-                        ),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                          children: [
-                            const Text(
-                              "Cambiar imagen:",
-                              style: TextStyle(fontSize: 24),
-                            ),
-                            const SizedBox(
-                              width: 20,
-                            ),
-                            _botonCambiarImagen(),
-                          ],
-                        ),
-                      ])
-                    : Column(
-                        children: [
-                          Container(
-                              decoration: BoxDecoration(
-                                  border: Border.all(color: Colors.black),
-                                  borderRadius: const BorderRadius.all(
-                                      Radius.circular(30))),
-                              child: const Icon(
-                                Icons.medication,
-                                size: 200,
-                                color: Colors.grey,
-                              )),
-                          const SizedBox(
-                            height: 10,
-                          ),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                Column(
+                  children: [
+                    // TODO: al clickar en la imagen, que se vea en pantalla completa
+                    _fotoPath.isNotEmpty
+                        ? Container(
+                            width: MediaQuery.sizeOf(context).width / 1.5,
+                            height: MediaQuery.sizeOf(context).height / 3.75,
+                            alignment: Alignment.center,
+                            // decoration: BoxDecoration(
+                            //   border: Border.all(color: Colors.black),
+                            //   borderRadius: const BorderRadius.all(Radius.circular(20))
+                            // ),
+                            child: Image.file(File(XFile(_fotoPath).path)),
+                          )
+                        : Column(
                             children: [
-                              const Text(
-                                "Añadir imagen:",
-                                style: TextStyle(fontSize: 24),
-                              ),
                               const SizedBox(
-                                width: 20,
+                                height: 15,
                               ),
-                              _botonCambiarImagen(),
+                              Container(
+                                  decoration: BoxDecoration(
+                                      border: Border.all(color: Colors.black),
+                                      borderRadius: const BorderRadius.all(
+                                          Radius.circular(30))),
+                                  child: const Icon(
+                                    Icons.medication,
+                                    size: 200,
+                                    color: Colors.grey,
+                                  )),
+                              const SizedBox(
+                                height: 10,
+                              )
                             ],
                           ),
-                        ],
-                    ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: [
+                        Text(
+                          _fotoPath.isNotEmpty
+                              ? "Cambiar imagen:"
+                              : "Añadir imagen:",
+                          style: const TextStyle(
+                              fontSize: 24, color: CustomColors.grisPizarra),
+                        ),
+                        const SizedBox(
+                          width: 20,
+                        ),
+                        _botonCambiarImagen(),
+                      ],
+                    )
+                  ],
+                ),
               ],
             ),
-            const SizedBox(
-              height: 30,
+            const Divider(
+              color: CustomColors.azulFrancia,
+            ),
+            _infoField("Nombre", widget._medicamento.nombre),
+            const SizedBox(height: 5),
+            _infoField("Dosis", widget._medicamento.dosis),
+            const SizedBox(height: 5),
+            _infoField(
+                "Frecuencia", "cada ${widget._medicamento.frecuencia} horas"),
+            const SizedBox(height: 5),
+            const Text(
+              "Horas de toma:",
+              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
             ),
             Text(
-              "Nombre: ${widget._medicamento.nombre}",
-              style: const TextStyle(
-                fontSize: 20,
-              ),
+              _horasTomaText,
+              style: const TextStyle(fontSize: 25),
             ),
-            Text(
-              "Dosis: ${widget._medicamento.dosis}",
-              style: const TextStyle(
-                fontSize: 20,
-              ),
-            ),
-            Text(
-              "Frecuencia: cada ${widget._medicamento.frecuencia} horas",
-              style: const TextStyle(
-                fontSize: 20,
-              ),
-            ),
-            Text(
-              "Duración: ${widget._medicamento.duracion} días",
-              style: const TextStyle(
-                fontSize: 20,
-              ),
-            ),
+            const SizedBox(height: 5),
+            _infoField("Duración",
+                "${widget._medicamento.duracion} ${widget._medicamento.duracion < 2 ? "día" : "días"}"),
           ],
         ),
       ),
     );
   }
 
-  // todo: modificar horas de toma de medicamento ¿? no creo
+  _infoField(String name, String info) => Row(
+        children: [
+          Text(
+            "$name: ",
+            style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+          ),
+          Text(
+            info,
+            style: const TextStyle(
+              fontSize: 24,
+              // fontWeight: FontWeight.bold
+            ),
+          ),
+        ],
+      );
 
   _floatingActionButton() => SizedBox(
         height: 80,
@@ -174,22 +183,18 @@ class _ScreenMedicamentoDetailsState extends State<ScreenMedicamentoDetails> {
                               color: Colors.black),
                           actions: [
                             TextButton(
-                                onPressed: () {
-                                  Navigator.pop(context);
-                                },
-                                child: const Text("Cancelar",
-                                    style: TextStyle(
-                                      fontSize: 20,
-                                    ))),
-                            TextButton(
-                                onPressed: () async{
+                                onPressed: () async {
                                   // Eliminar medicamento y recordatorios de la db
                                   final query = await DbHelper().db.query(
-                                      RecordatorioDao().tableName, where: "id_medicamento = ?", whereArgs: [widget._medicamento.id]);
+                                      RecordatorioDao().tableName,
+                                      where: "id_medicamento = ?",
+                                      whereArgs: [widget._medicamento.id]);
 
-                                  final listaRecordatorios = query.map((e) => Recordatorio.fromMap(e)).toList();
+                                  final listaRecordatorios = query
+                                      .map((e) => Recordatorio.fromMap(e))
+                                      .toList();
 
-                                  for(Recordatorio rec in listaRecordatorios){
+                                  for (Recordatorio rec in listaRecordatorios) {
                                     final queryHistorial = await DbHelper()
                                         .db
                                         .query(HistorialDao().tableName,
@@ -200,8 +205,10 @@ class _ScreenMedicamentoDetailsState extends State<ScreenMedicamentoDetails> {
                                         .map((e) => Historial.fromMap(e))
                                         .toList();
 
-                                    HistorialDao()
-                                        .deleteHistorial(historial[0]);
+                                    if (historial.isNotEmpty) {
+                                      HistorialDao()
+                                          .deleteHistorial(historial[0]);
+                                    }
 
                                     // Eliminar recordatorio
                                     RecordatorioDao().deleteRecordatorio(rec);
@@ -211,18 +218,8 @@ class _ScreenMedicamentoDetailsState extends State<ScreenMedicamentoDetails> {
                                     Alarm.stop(rec.id);
                                   }
 
-                                  MedicamentoDao().deleteMedicamento(widget._medicamento);
-
-                                  // /// TODO: mostrar texto que se ha eliminado con exito ¿?
-                                  // showDialog(
-                                  //     context: context,
-                                  //     builder: (_) => AlertDialog(
-                                  //       title: const Text("Se ha borrado con éxito"),
-                                  //       actions: [
-                                  //         TextButton(onPressed: (){Navigator.pop(context);}, child: const Text("Vale"))
-                                  //       ],
-                                  //     ),
-                                  //     );
+                                  MedicamentoDao()
+                                      .deleteMedicamento(widget._medicamento);
 
                                   // Salir de Dialog y salir a pantalla de listado de medicamentos
                                   Navigator.pop(context);
@@ -231,6 +228,14 @@ class _ScreenMedicamentoDetailsState extends State<ScreenMedicamentoDetails> {
                                 child: const Text("Sí",
                                     style: TextStyle(
                                         fontSize: 20, color: Colors.red))),
+                            TextButton(
+                                onPressed: () {
+                                  Navigator.pop(context);
+                                },
+                                child: const Text("Cancelar",
+                                    style: TextStyle(
+                                      fontSize: 20,
+                                    ))),
                           ],
                         ));
               }),
@@ -305,5 +310,25 @@ class _ScreenMedicamentoDetailsState extends State<ScreenMedicamentoDetails> {
 
   _addFoto(Medicamento med) {
     MedicamentoDao().updateMedicamento(med);
+  }
+
+  _getHorasToma() {
+    // Conseguir la hora de inicio con el primer recordatorio del medicamento
+    DbHelper().db.query(RecordatorioDao().tableName,
+        where: "id_medicamento = ?",
+        whereArgs: [widget._medicamento.id]).then((query) {
+      final recordatorio =
+          query.map((map) => Recordatorio.fromMap(map)).toList();
+      for (int i = 0; i < 24 / widget._medicamento.frecuencia; i++) {
+        if ((i == 0 && 24 / widget._medicamento.frecuencia == 1) ||
+            (i == 24 / widget._medicamento.frecuencia - 1)) {
+          _horasTomaText += recordatorio[i].hora.split(' ').last;
+        } else {
+          _horasTomaText += "${recordatorio[i].hora.split(' ').last}, \t";
+        }
+      }
+
+      setState(() {});
+    });
   }
 }
